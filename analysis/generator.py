@@ -16,8 +16,10 @@ class ModelGConvTranspose(nn.Module):
         self.conv2 = nn.ConvTranspose2d(256, 128, 3)
         self.conv3 = nn.ConvTranspose2d(128, 64, 3)
         self.conv4 = nn.ConvTranspose2d(64, 32, 3)
-        self.conv5 = nn.ConvTranspose2d(32, 16, 3)
-        self.conv6 = nn.ConvTranspose2d(16, 1, 3)
+        self.conv5 = nn.ConvTranspose2d(32, 32, 2)
+        self.conv6 = nn.ConvTranspose2d(32, 16, 2)
+        self.conv7 = nn.ConvTranspose2d(16, 16, 2)        
+        self.conv8 = nn.ConvTranspose2d(16, 1, 3)
         
         
     def forward(self, z, ParticleMomentum_ParticlePoint):
@@ -35,6 +37,8 @@ class ModelGConvTranspose(nn.Module):
         EnergyDeposit = F.leaky_relu(self.conv3(EnergyDeposit))
         EnergyDeposit = F.leaky_relu(self.conv4(EnergyDeposit))
         EnergyDeposit = F.leaky_relu(self.conv5(EnergyDeposit))
-        EnergyDeposit = self.conv6(EnergyDeposit)
+        EnergyDeposit = F.leaky_relu(self.conv6(EnergyDeposit))        
+#         EnergyDeposit = F.leaky_relu(self.conv7(EnergyDeposit))                
+        EnergyDeposit = self.conv8(EnergyDeposit)
 
         return EnergyDeposit
