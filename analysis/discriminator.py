@@ -28,7 +28,7 @@ class ModelD(nn.Module):
         
     def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint):
 #         EnergyDeposit = NormalizeImage(EnergyDeposit_raw)
-        EnergyDeposit = EnergyDeposit/EnergyScale
+        EnergyDeposit = EnergyDeposit/self.EnergyScale
         ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
         LabelImages = LabelToImages(IMAGE_DIM,IMAGE_DIM,ParticleMomentum_ParticlePoint)
         EnergyDeposit = torch.cat([EnergyDeposit,LabelImages.cuda()],dim=1)
