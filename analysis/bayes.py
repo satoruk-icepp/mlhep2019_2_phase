@@ -24,7 +24,7 @@ class NoiseLoss(nn.Module):
             # The derivative wrt v will become scale*z
 #             _noise = noise.normal_(0.,self.noise_std)
             _noise = self.noise_std*torch.randn(1)
-            noise_loss += torch.sum(Variable(_noise.to(device))*var)
+            noise_loss += torch.sum(Variable(_noise)*var)
         noise_loss /= observed
         return noise_loss
 
