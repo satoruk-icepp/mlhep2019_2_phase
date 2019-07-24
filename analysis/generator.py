@@ -30,7 +30,7 @@ class ResidualBlock(nn.Module):
         return x
 
 class ModelGConvTranspose(nn.Module):
-    def __init__(self, z_dim):
+    def __init__(self, z_dim, MomentumScale, PointScale, EnergyScale):
         self.z_dim = z_dim
         super(ModelGConvTranspose, self).__init__()
         self.fc1 = nn.Linear(self.z_dim + 2 + 3, 256*4*4)
@@ -46,11 +46,12 @@ class ModelGConvTranspose(nn.Module):
         self.resconv5 = ReducedConv(16,1,25,30,3)
         self.dropout = nn.Dropout(p=0.2)
         self.finout = nn.Tanh()
+        self.MomentumScale = MomentumScale
+        self.PointScale = PointScale
+        self.EnergyScale = EnergyScale
         
     def forward(self, z, ParticleMomentum_ParticlePoint):
-        MomentumScaleTensor = torch.tensor(MomentumScale)
-        PointScaleTensor    = torch.tensor(PointScale)
-        ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([MomentumScaleTensor,PointScaleTensor]))
+        ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
         x = F.leaky_relu(self.fc1(
             torch.cat([z, ParticleMomentum_ParticlePoint], dim=1)
         ))
