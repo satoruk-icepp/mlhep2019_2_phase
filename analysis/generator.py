@@ -63,6 +63,6 @@ class ModelGConvTranspose(nn.Module):
 
         EnergyDeposit = self.resconv5(EnergyDeposit)
         EnergyDeposit = torch.tanh(EnergyDeposit)
-        EnergyDeposit = EnergyDeposit*EnergyDepositScale
+        EnergyDeposit = EnergyDeposit*self.EnergyScale
 
         return EnergyDeposit
