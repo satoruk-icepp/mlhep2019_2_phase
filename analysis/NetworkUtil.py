@@ -1,3 +1,7 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 class ReducedConv(nn.Module):
     def __init__(self,input_size,output_size, input_dim, output_dim,kernel_size):
         super(ReducedConv, self).__init__()
