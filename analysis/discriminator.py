@@ -39,7 +39,7 @@ class ModelD(nn.Module):
 #         EnergyDeposit = NormalizeImage(EnergyDeposit_raw)
         EnergyDeposit = EnergyDeposit/self.EnergyScale
         ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
-        LabelImages = LabelToImages(EnergyDeposit.shape()[2],EnergyDeposit.shape()[3],ParticleMomentum_ParticlePoint)
+        LabelImages = LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint)
         EnergyDeposit = torch.cat([EnergyDeposit,LabelImages.cuda()],dim=1)
         EnergyDeposit = F.leaky_relu(self.conv1(EnergyDeposit))
         EnergyDeposut = self.dropout(EnergyDeposit)        
