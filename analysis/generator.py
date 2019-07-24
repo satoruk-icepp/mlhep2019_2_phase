@@ -48,6 +48,9 @@ class ModelGConvTranspose(nn.Module):
         self.finout = nn.Tanh()
         
     def forward(self, z, ParticleMomentum_ParticlePoint):
+        MomentumScaleTensor = torch.tensor(MomentumScale)
+        PointScaleTensor    = torch.tensor(PointScale)
+        ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([MomentumScaleTensor,PointScaleTensor]))
         x = F.leaky_relu(self.fc1(
             torch.cat([z, ParticleMomentum_ParticlePoint], dim=1)
         ))
