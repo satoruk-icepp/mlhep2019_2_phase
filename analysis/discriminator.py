@@ -41,6 +41,7 @@ class ModelD(nn.Module):
         
     def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint):
 #         EnergyDeposit = NormalizeImage(EnergyDeposit_raw)
+        assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
         EnergyDeposit = EnergyDeposit/self.EnergyScale
         ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
         LabelImages = LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint)
