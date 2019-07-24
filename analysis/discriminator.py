@@ -13,9 +13,9 @@ def LabelToImages(row,col,MomentumPoint):
     return torch.Tensor(images)
 
 class ModelD(nn.Module):
-    def __init__(self, z_dim, MomentumScale, PointScale, EnergyScale):
+    def __init__(self, cond_dim, MomentumScale, PointScale, EnergyScale):
         super(ModelD, self).__init__()
-        self.conv1 = nn.Conv2d(1+z_dim, 16, 4, stride=2)#30->14
+        self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2)#30->14
         self.bn1 = nn.BatchNorm2d(16)
         self.dropout = nn.Dropout(p=0.5)
         self.conv2 = nn.Conv2d(16, 32, 4)##14->11
