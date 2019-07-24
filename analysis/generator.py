@@ -15,7 +15,7 @@ class ModelGConvTranspose(nn.Module):
         # self.resblock = ResidualBlock(16)
         # self.resconv0 = ReducedConv(1+5,256,10,10,3)
         # self.resconv1 = ReducedConv(256,128,4,10,3)
-        self.resconv1 = ReducedConv(1+5,256,10,13,3)
+        self.resconv1 = ReducedConv(1+5,256,self.z_dim,13,3)
         self.bn1 = nn.BatchNorm2d(256)
         self.resconv2 = ReducedConv(256,128,13,15,3)
         self.bn2 = nn.BatchNorm2d(128)
@@ -47,7 +47,7 @@ class ModelGConvTranspose(nn.Module):
 
         EnergyDeposit = self.resconv6(EnergyDeposit)
         EnergyDeposit = torch.tanh(EnergyDeposit)
-        assert EnergyDeposit.shape[2]==30, 'Generated Image has wrong size.'
+        assert EnergyDeposit.shape[2]==30, 'Generated Image has wrong size: %d'EnergyDeposit.shape[2]
         EnergyDeposit = EnergyDeposit*self.EnergyScale
 
         return EnergyDeposit
