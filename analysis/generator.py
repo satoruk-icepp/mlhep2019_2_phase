@@ -1,39 +1,20 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-NOISE_DIM = 10
+import Label2Image
+from NetworkUtil import ReducedConv,ResidualBlock
+# NOISE_DIM = 10
 
-
-class ReducedConv(nn.Module):
-    def __init__(self,input_size,output_size, input_dim, output_dim,kernel_size):
-        super(ReducedConv, self).__init__()
-        scale = float(output_dim+kernel_size-3)/float(input_dim)
-        self.ups = nn.Upsample(scale_factor = scale,mode = 'bilinear',align_corners=False )
-        self.ref = nn.ReflectionPad2d(1)
-        self.conv = nn.Conv2d(input_size,output_size,kernel_size)
-    def forward(self,x):
-        return self.conv(self.ref(self.ups(x)))
-#         return self.ref(self.ups(x))
-
-class ResidualBlock(nn.Module):
-    def __init__(self,input_size):
-        super(ResidualBlock, self).__init__()        
-        self.conv1 = nn.Conv2d(input_size,input_size,3,padding=1)
-        self.conv2 = nn.Conv2d(input_size,input_size,3,padding=1)
-        self.bn1 = nn.BatchNorm2d(self.conv1.out_channels)
-        self.bn2 = nn.BatchNorm2d(self.conv2.out_channels)        
-    def forward(self,xraw):
-        x = F.leaky_relu(self.bn1(self.conv1(xraw)))
-        x = F.leaky_relu(self.bn2(self.conv2(x))+xraw)
-        return x
 
 class ModelGConvTranspose(nn.Module):
     def __init__(self, z_dim, MomentumScale, PointScale, EnergyScale):
         self.z_dim = z_dim
         super(ModelGConvTranspose, self).__init__()
-        self.fc1 = nn.Linear(self.z_dim + 2 + 3, 256*4*4)
-        self.resblock = ResidualBlock(16)
-        self.resconv1 = ReducedConv(256,128,4,10,3)
+        # self.fc1 = nn.Linear(self.z_dim + 2 + 3, 256*4*4)
+        # self.resblock = ResidualBlock(16)
+        # self.resconv0 = ReducedConv(1+5,256,10,10,3)
+        # self.resconv1 = ReducedConv(256,128,4,10,3)
+        self.resconv1 = ReducedConv(1+5,128,10,10,3)
         self.bn1 = nn.BatchNorm2d(128)
         self.resconv2 = ReducedConv(128,64,10,15,3)
         self.bn2 = nn.BatchNorm2d(64)
@@ -50,11 +31,12 @@ class ModelGConvTranspose(nn.Module):
         
     def forward(self, z, ParticleMomentum_ParticlePoint):
         ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
-        x = F.leaky_relu(self.fc1(
-            torch.cat([z, ParticleMomentum_ParticlePoint], dim=1)
-        ))
-        
-        EnergyDeposit = x.view(-1, 256, 4, 4)
+        LabelImages = LabelToImages(self.z_dim,self.z_dim,ParticleMomentum_ParticlePoint)
+        # x = F.leaky_relu(self.fc1(
+        #     torch.cat([z, ParticleMomentum_ParticlePoint], dim=1)
+        # ))
+        EnergyDeposit = torch.cat([EnergyDeposit,LabelImages.cuda()],dim=1)
+        # EnergyDeposit = x.view(-1, 256, 4, 4)
         
         EnergyDeposit = F.relu(self.bn1(self.resconv1(EnergyDeposit)))
         EnergyDeposit = F.relu(self.bn2(self.resconv2(EnergyDeposit)))
