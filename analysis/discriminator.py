@@ -32,7 +32,7 @@ class ModelD(nn.Module):
         self.bn_fc2 = nn.BatchNorm1d(512)
         self.bn_fc3 = nn.BatchNorm1d(128)
         self.bn_fc4 = nn.BatchNorm1d(64)
-        self.activation = nn.leaky_relu(negatice_slope = 0.2)
+        self.activation = nn.LeakyReLU(negative_slope = 0.2)
         self.dropout = nn.Dropout(p=0.5)
         self.resblock = ResidualBlock(128)
         self.MomentumScale = MomentumScale

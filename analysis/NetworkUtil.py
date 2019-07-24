@@ -20,7 +20,8 @@ class ResidualBlock(nn.Module):
         self.conv2 = nn.Conv2d(input_size,input_size,3,padding=1)
         self.bn1 = nn.BatchNorm2d(self.conv1.out_channels)
         self.bn2 = nn.BatchNorm2d(self.conv2.out_channels)        
+        self.activation = nn.LeakyReLU(0.2)
     def forward(self,xraw):
-        x = F.leaky_relu(self.bn1(self.conv1(xraw)))
-        x = F.leaky_relu(self.bn2(self.conv2(x))+xraw)
+        x = self.activation(self.bn1(self.conv1(xraw)))
+        x = self.activation(self.bn2(self.conv2(x))+xraw)
         return x
