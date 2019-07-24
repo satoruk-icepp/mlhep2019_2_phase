@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys
 import numpy as np
-from analysis.generator import ModelGConvTranspose, NOISE_DIM
+from analysis.generator import ModelGConvTranspose
 from tqdm import tqdm
 import torch
 import torch.nn as nn
@@ -9,6 +9,12 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data as utils
 import os
+
+NOISEIMAGE_DIM=10
+NOISE_DIM=NOISEIMAGE_DIM**2
+EnergyDepositScale = torch.tensor([4000]).float()
+MomentumScale      = torch.tensor([30,30,100]).float()
+PointScale         = torch.tensor([10,10]).float()
 
 def main():
     input_dir, output_dir = sys.argv[1:]
@@ -19,7 +25,7 @@ def main():
     data_test = np.load(input_dir + '/data_test.npz', allow_pickle=True)
     test_data_path_out = output_dir + '/data_test_prediction.npz'
     
-    generator_cpu = ModelGConvTranspose(NOISE_DIM)
+    generator_cpu = ModelGConvTranspose(z_dim=NOISEIMAGE_DIM, MomentumScale = MomentumScale,PointScale = PointScale,EnergyScale = EnergyDepositScale)
     generator_cpu.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__)) + '/gan.pt'))
     generator_cpu.eval()
     
