@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import Label2Image
+from Label2Image import LabelToImages
 # NOISE_DIM = 10
 
 class ModelD(nn.Module):
