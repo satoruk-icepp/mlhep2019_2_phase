@@ -38,12 +38,17 @@ class ModelGConvTranspose(nn.Module):
         z_image = z.view(-1,1,self.z_dim,self.z_dim)
         EnergyDeposit = torch.cat([z_image,LabelImages.cuda()],dim=1)
         # EnergyDeposit = x.view(-1, 256, 4, 4)
-        
+        assert EnergyDeposit.shape[2]==10, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn1(self.resconv1(EnergyDeposit)),0.2)
+        assert EnergyDeposit.shape[2]==13, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn2(self.resconv2(EnergyDeposit)),0.2)
+        assert EnergyDeposit.shape[2]==15, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn3(self.resconv3(EnergyDeposit)),0.2)
+        assert EnergyDeposit.shape[2]==18, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn4(self.resconv4(EnergyDeposit)),0.2)
+        assert EnergyDeposit.shape[2]==20, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn5(self.resconv5(EnergyDeposit)),0.2)
+        assert EnergyDeposit.shape[2]==25, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
 
         EnergyDeposit = self.resconv6(EnergyDeposit)
         EnergyDeposit = torch.tanh(EnergyDeposit)
