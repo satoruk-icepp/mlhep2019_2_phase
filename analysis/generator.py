@@ -47,7 +47,7 @@ class ModelGConvTranspose(nn.Module):
 
         EnergyDeposit = self.resconv6(EnergyDeposit)
         EnergyDeposit = torch.tanh(EnergyDeposit)
-        assert EnergyDeposit.shape[2]==30, 'Generated Image has wrong size: %d'EnergyDeposit.shape[2]
+        assert EnergyDeposit.shape[2]==30, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = EnergyDeposit*self.EnergyScale
 
         return EnergyDeposit
