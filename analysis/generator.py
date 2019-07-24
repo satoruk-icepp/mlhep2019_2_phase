@@ -2,9 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 NOISE_DIM = 10
-EnergyDepositScale = 4000
-MomentumScale = [30,30,100]
-PointScale = [10,10]
+
 
 class ReducedConv(nn.Module):
     def __init__(self,input_size,output_size, input_dim, output_dim,kernel_size):
