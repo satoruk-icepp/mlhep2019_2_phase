@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
 
 class NoiseLoss(nn.Module):
   # need the scale for noise standard deviation
