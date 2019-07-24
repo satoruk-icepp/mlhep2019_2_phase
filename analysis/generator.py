@@ -2,43 +2,65 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 NOISE_DIM = 10
+EnergyDepositScale = 4000
+MomentumScale = [30,30,100]
+PointScale = [10,10]
+
+class ReducedConv(nn.Module):
+    def __init__(self,input_size,output_size, input_dim, output_dim,kernel_size):
+        super(ReducedConv, self).__init__()
+        scale = float(output_dim+kernel_size-3)/float(input_dim)
+        self.ups = nn.Upsample(scale_factor = scale,mode = 'bilinear',align_corners=False )
+        self.ref = nn.ReflectionPad2d(1)
+        self.conv = nn.Conv2d(input_size,output_size,kernel_size)
+    def forward(self,x):
+        return self.conv(self.ref(self.ups(x)))
+#         return self.ref(self.ups(x))
+
+class ResidualBlock(nn.Module):
+    def __init__(self,input_size):
+        super(ResidualBlock, self).__init__()        
+        self.conv1 = nn.Conv2d(input_size,input_size,3,padding=1)
+        self.conv2 = nn.Conv2d(input_size,input_size,3,padding=1)
+        self.bn1 = nn.BatchNorm2d(self.conv1.out_channels)
+        self.bn2 = nn.BatchNorm2d(self.conv2.out_channels)        
+    def forward(self,xraw):
+        x = F.leaky_relu(self.bn1(self.conv1(xraw)))
+        x = F.leaky_relu(self.bn2(self.conv2(x))+xraw)
+        return x
 
 class ModelGConvTranspose(nn.Module):
     def __init__(self, z_dim):
         self.z_dim = z_dim
         super(ModelGConvTranspose, self).__init__()
-        self.fc1 = nn.Linear(self.z_dim + 2 + 3, 64)
-        self.fc2 = nn.Linear(64, 128)
-        self.fc3 = nn.Linear(128, 512)
-        self.fc4 = nn.Linear(512, 20736)
-        
-        self.conv1 = nn.ConvTranspose2d(256, 256, 3, stride=2, output_padding=1)
-        self.conv2 = nn.ConvTranspose2d(256, 128, 3)
-        self.conv3 = nn.ConvTranspose2d(128, 64, 3)
-        self.conv4 = nn.ConvTranspose2d(64, 32, 3)
-        self.conv5 = nn.ConvTranspose2d(32, 32, 2)
-        self.conv6 = nn.ConvTranspose2d(32, 16, 2)
-        self.conv7 = nn.ConvTranspose2d(16, 16, 2)        
-        self.conv8 = nn.ConvTranspose2d(16, 1, 3)
-        
+        self.fc1 = nn.Linear(self.z_dim + 2 + 3, 256*4*4)
+        self.resblock = ResidualBlock(16)
+        self.resconv1 = ReducedConv(256,128,4,10,3)
+        self.bn1 = nn.BatchNorm2d(128)
+        self.resconv2 = ReducedConv(128,64,10,15,3)
+        self.bn2 = nn.BatchNorm2d(64)
+        self.resconv3 = ReducedConv(64,32,15,20,3)
+        self.bn3 = nn.BatchNorm2d(32)
+        self.resconv4 = ReducedConv(32,16,20,25,3)
+        self.bn4 = nn.BatchNorm2d(16)        
+        self.resconv5 = ReducedConv(16,1,25,30,3)
+        self.dropout = nn.Dropout(p=0.2)
+        self.finout = nn.Tanh()
         
     def forward(self, z, ParticleMomentum_ParticlePoint):
         x = F.leaky_relu(self.fc1(
             torch.cat([z, ParticleMomentum_ParticlePoint], dim=1)
         ))
-        x = F.leaky_relu(self.fc2(x))
-        x = F.leaky_relu(self.fc3(x))
-        x = F.leaky_relu(self.fc4(x))
         
-        EnergyDeposit = x.view(-1, 256, 9, 9)
+        EnergyDeposit = x.view(-1, 256, 4, 4)
         
-        EnergyDeposit = F.leaky_relu(self.conv1(EnergyDeposit))
-        EnergyDeposit = F.leaky_relu(self.conv2(EnergyDeposit))
-        EnergyDeposit = F.leaky_relu(self.conv3(EnergyDeposit))
-        EnergyDeposit = F.leaky_relu(self.conv4(EnergyDeposit))
-        EnergyDeposit = F.leaky_relu(self.conv5(EnergyDeposit))
-        EnergyDeposit = F.leaky_relu(self.conv6(EnergyDeposit))        
-#         EnergyDeposit = F.leaky_relu(self.conv7(EnergyDeposit))                
-        EnergyDeposit = self.conv8(EnergyDeposit)
+        EnergyDeposit = F.relu(self.bn1(self.resconv1(EnergyDeposit)))
+        EnergyDeposit = F.relu(self.bn2(self.resconv2(EnergyDeposit)))
+        EnergyDeposit = F.relu(self.bn3(self.resconv3(EnergyDeposit)))
+        EnergyDeposit = F.relu(self.bn4(self.resconv4(EnergyDeposit)))
+
+        EnergyDeposit = self.resconv5(EnergyDeposit)
+        EnergyDeposit = torch.tanh(EnergyDeposit)
+        EnergyDeposit = EnergyDeposit*EnergyDepositScale
 
         return EnergyDeposit
