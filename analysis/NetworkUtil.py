@@ -5,14 +5,16 @@ import torch.nn.functional as F
 class ReducedConv(nn.Module):
     def __init__(self,input_size,output_size, input_dim, output_dim,kernel_size):
         super(ReducedConv, self).__init__()
+        self.input_dim  = input_dim
+        self.output_dim = output_dim
         scale = float(output_dim+kernel_size-3)/float(input_dim)
         self.ups = nn.Upsample(scale_factor = scale,mode = 'bilinear',align_corners=False )
         self.ref = nn.ReflectionPad2d(1)
         self.conv = nn.Conv2d(input_size,output_size,kernel_size)
     def forward(self,x):
-        assert x.shape[2]==input_dim, "original image is wrong size, %d"%(x.shape[2])
+        assert x.shape[2]==self.input_dim, "original image is wrong size, %d"%(x.shape[2])
         x = self.conv(self.ref(self.ups(x)))
-        assert x.shape[2]==output_dim, "not properly scaled, %d"%(x.shape[2])
+        assert x.shape[2]==self.output_dim, "not properly scaled, %d"%(x.shape[2])
         return x
 #         return self.ref(self.ups(x))
 
