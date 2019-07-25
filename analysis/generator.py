@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import Label2Image
 # from Label2Image import LabelToImages
 from NetworkUtil import ReducedConv,ResidualBlock
+import Normalization
 # NOISE_DIM = 10
 
 
@@ -34,7 +35,8 @@ class ModelGConvTranspose(nn.Module):
         self.EnergyScale   = EnergyScale
         
     def forward(self, z, ParticleMomentum_ParticlePoint):
-        ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
+        # ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
+        ParticleMomentum_ParticlePoint = GetNormalizedMomentumPoint(ParticleMomentum_ParticlePoint,self.MomentumScale,self.PointScale)
         LabelImages = Label2Image.LabelToImages(self.z_dim,self.z_dim,ParticleMomentum_ParticlePoint)
         z_image = z.view(-1,1,self.z_dim,self.z_dim)
         EnergyDeposit = torch.cat([z_image,LabelImages.cuda()],dim=1)

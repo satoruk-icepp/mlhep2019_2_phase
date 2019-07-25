@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import Label2Image
 from NetworkUtil import ReducedConv,ResidualBlock
+import Normalization
 # NOISE_DIM = 10
 
 def LabelToImages(row,col,MomentumPoint):
@@ -43,7 +44,8 @@ class ModelD(nn.Module):
 #         EnergyDeposit = NormalizeImage(EnergyDeposit_raw)
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
         EnergyDeposit = EnergyDeposit/self.EnergyScale
-        ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
+        # ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
+        ParticleMomentum_ParticlePoint = GetNormalizedMomentumPoint(ParticleMomentum_ParticlePoint,self.MomentumScale,self.PointScale)
         LabelImages = LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint)
         EnergyDeposit = torch.cat([EnergyDeposit,LabelImages.cuda()],dim=1)
         EnergyDeposit = self.activation(self.conv1(EnergyDeposit))
