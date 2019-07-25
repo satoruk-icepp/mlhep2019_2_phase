@@ -54,8 +54,8 @@ class ModelD(nn.Module):
         EnergyDeposut = self.dropout(EnergyDeposit)
         EnergyDeposit = self.activation(self.bn4(self.conv4(EnergyDeposit))) # 32, 9, 9
         EnergyDeposut = self.dropout(EnergyDeposit)
-        for i in range(5):
-            EnergyDeposit = self.resblock(EnergyDeposit)
+        # for i in range(5):
+        #     EnergyDeposit = self.resblock(EnergyDeposit)
                 
         EnergyDeposit = self.conv5(EnergyDeposit) # 32, 9, 9        
         return torch.sigmoid(EnergyDeposit)
