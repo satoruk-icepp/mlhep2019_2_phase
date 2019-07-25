@@ -28,6 +28,7 @@ class ModelGConvTranspose(nn.Module):
         self.resconv6 = ReducedConv(16,1,26,30,3)
         # self.dropout = nn.Dropout(p=0.2)
         self.finout = nn.Tanh()
+        self.activation = nn.LeakyReLU()
         self.MomentumScale = MomentumScale
         self.PointScale    = PointScale
         self.EnergyScale   = EnergyScale
@@ -38,11 +39,11 @@ class ModelGConvTranspose(nn.Module):
         z_image = z.view(-1,1,self.z_dim,self.z_dim)
         EnergyDeposit = torch.cat([z_image,LabelImages.cuda()],dim=1)
         # EnergyDeposit = x.view(-1, 256, 4, 4)
-        EnergyDeposit = F.leaky_relu(self.bn1(self.resconv1(EnergyDeposit)),0.2)
-        EnergyDeposit = F.leaky_relu(self.bn2(self.resconv2(EnergyDeposit)),0.2)
-        EnergyDeposit = F.leaky_relu(self.bn3(self.resconv3(EnergyDeposit)),0.2)
-        EnergyDeposit = F.leaky_relu(self.bn4(self.resconv4(EnergyDeposit)),0.2)
-        EnergyDeposit = F.leaky_relu(self.bn5(self.resconv5(EnergyDeposit)),0.2)
+        EnergyDeposit = self.activation(self.bn1(self.resconv1(EnergyDeposit)))
+        EnergyDeposit = self.activation(self.bn2(self.resconv2(EnergyDeposit)))
+        EnergyDeposit = self.activation(self.bn3(self.resconv3(EnergyDeposit)))
+        EnergyDeposit = self.activation(self.bn4(self.resconv4(EnergyDeposit)))
+        EnergyDeposit = self.activation(self.bn5(self.resconv5(EnergyDeposit)))
 
         EnergyDeposit = self.resconv6(EnergyDeposit)
         EnergyDeposit = torch.tanh(EnergyDeposit)
