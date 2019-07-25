@@ -17,20 +17,20 @@ class ModelGConvTranspose(nn.Module):
         # self.resconv1 = ReducedConv(256,128,4,10,3)
         self.resconv1 = ReducedConv(1+5,256,self.z_dim,13,3)
         self.bn1 = nn.BatchNorm2d(256)
-        self.resconv2 = ReducedConv(256,128,13,15,3)
+        self.resconv2 = ReducedConv(256,128,13,16,3)
         self.bn2 = nn.BatchNorm2d(128)
-        self.resconv3 = ReducedConv(128,64,15,18,3)
+        self.resconv3 = ReducedConv(128,64,16,20,3)
         self.bn3 = nn.BatchNorm2d(64)
-        self.resconv4 = ReducedConv(64,32,18,20,3)
+        self.resconv4 = ReducedConv(64,32,20,23,3)
         self.bn4 = nn.BatchNorm2d(32)
-        self.resconv5 = ReducedConv(32,16,20,25,3)
-        self.bn5 = nn.BatchNorm2d(16)                
-        self.resconv6 = ReducedConv(16,1,25,30,3)
+        self.resconv5 = ReducedConv(32,16,23,26,3)
+        self.bn5      = nn.BatchNorm2d(16)
+        self.resconv6 = ReducedConv(16,1,26,30,3)
         # self.dropout = nn.Dropout(p=0.2)
         self.finout = nn.Tanh()
         self.MomentumScale = MomentumScale
-        self.PointScale = PointScale
-        self.EnergyScale = EnergyScale
+        self.PointScale    = PointScale
+        self.EnergyScale   = EnergyScale
         
     def forward(self, z, ParticleMomentum_ParticlePoint):
         ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
@@ -38,17 +38,11 @@ class ModelGConvTranspose(nn.Module):
         z_image = z.view(-1,1,self.z_dim,self.z_dim)
         EnergyDeposit = torch.cat([z_image,LabelImages.cuda()],dim=1)
         # EnergyDeposit = x.view(-1, 256, 4, 4)
-        assert EnergyDeposit.shape[2]==10, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn1(self.resconv1(EnergyDeposit)),0.2)
-        assert EnergyDeposit.shape[2]==13, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn2(self.resconv2(EnergyDeposit)),0.2)
-        assert EnergyDeposit.shape[2]==15, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn3(self.resconv3(EnergyDeposit)),0.2)
-        assert EnergyDeposit.shape[2]==18, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn4(self.resconv4(EnergyDeposit)),0.2)
-        assert EnergyDeposit.shape[2]==20, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
         EnergyDeposit = F.leaky_relu(self.bn5(self.resconv5(EnergyDeposit)),0.2)
-        assert EnergyDeposit.shape[2]==25, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
 
         EnergyDeposit = self.resconv6(EnergyDeposit)
         EnergyDeposit = torch.tanh(EnergyDeposit)

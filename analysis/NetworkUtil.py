@@ -10,7 +10,10 @@ class ReducedConv(nn.Module):
         self.ref = nn.ReflectionPad2d(1)
         self.conv = nn.Conv2d(input_size,output_size,kernel_size)
     def forward(self,x):
-        return self.conv(self.ref(self.ups(x)))
+        assert x.shape[2]==input_dim, "original image is wrong size, %d"%(x.shape[2])
+        x = self.conv(self.ref(self.ups(x)))
+        assert x.shape[2]==output_dim, "not properly scaled, %d"%(x.shape[2])
+        return x
 #         return self.ref(self.ups(x))
 
 class ResidualBlock(nn.Module):
