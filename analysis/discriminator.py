@@ -47,7 +47,7 @@ class ModelD(nn.Module):
         self.EnergyScale = EnergyScale
         self.Nredconv_dis = Nredconv_dis
         
-    def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint):
+    def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint_ParticlePDG):
 #         EnergyDeposit = NormalizeImage(EnergyDeposit_raw)
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
         EnergyDeposit = EnergyDeposit/self.EnergyScale

@@ -20,7 +20,7 @@ class ModelGConvTranspose(nn.Module):
         # self.resblock = ResidualBlock(16)
         # self.resconv0 = ReducedConv(1+5,256,10,10,3)
         # self.resconv1 = ReducedConv(256,128,4,10,3)
-        self.resconv1 = ReducedConv(1+5,256,self.z_dim,13,3)
+        self.resconv1 = ReducedConv(1+6,256,self.z_dim,13,3)
         self.bn1 = nn.BatchNorm2d(256)
         self.resconv2 = ReducedConv(256,128,13,16,3)
         self.bn2 = nn.BatchNorm2d(128)
