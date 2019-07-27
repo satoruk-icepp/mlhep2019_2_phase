@@ -20,21 +20,22 @@ class ModelGConvTranspose(nn.Module):
         # self.resblock = ResidualBlock(16)
         # self.resconv0 = ReducedConv(1+5,256,10,10,3)
         # self.resconv1 = ReducedConv(256,128,4,10,3)
-        self.resconv1 = ReducedConv(1+6,256,self.z_dim,10,3)
+        self.resconv1 = ReducedConv(1+6,128,self.z_dim,10,3)
         self.bn1 = nn.BatchNorm2d(256)
-        self.resconv2 = ReducedConv(256,128,10,14,3)
+        self.resconv2 = ReducedConv(128,64,10,14,3)
         self.bn2 = nn.BatchNorm2d(128)
-        self.resconv3 = ReducedConv(128,64,14,18,3)
+        self.resconv3 = ReducedConv(64,32,14,18,3)
         self.bn3 = nn.BatchNorm2d(64)
-        self.resconv4 = ReducedConv(64,32,18,22,3)
+        self.resconv4 = ReducedConv(32,16,18,22,3)
         self.bn4 = nn.BatchNorm2d(32)
-        self.resconv5 = ReducedConv(32,16,22,26,3)
+        self.resconv5 = ReducedConv(16,8,22,26,3)
         self.bn5      = nn.BatchNorm2d(16)
-        self.resconv6 = ReducedConv(16,1,26,30,3)
+        self.resconv6 = ReducedConv(8,1,26,30,3)
         self.samesizerc = ReducedConv(16,16,22,22,3)
         # self.dropout = nn.Dropout(p=0.2)
         self.finout = nn.Tanh()
         self.activation = nn.LeakyReLU(0.2)
+        self.bnrc = nn.BatchNorm2d(128)
         self.MomentumPointPDGScale = MomentumPointPDGScale
         # self.PointScale    = PointScale
         self.EnergyScale   = EnergyScale
@@ -52,7 +53,7 @@ class ModelGConvTranspose(nn.Module):
         EnergyDeposit = self.activation(self.bn3(self.resconv3(EnergyDeposit)))
         EnergyDeposit = self.activation(self.bn4(self.resconv4(EnergyDeposit)))
         for i in range(self.Nredconv_gen):
-            EnergyDeposit = self.activation(self.bn4(self.samesizerc(EnergyDeposit)))
+            EnergyDeposit = self.activation(self.bnrc(self.samesizerc(EnergyDeposit)))
         EnergyDeposit = self.activation(self.bn5(self.resconv5(EnergyDeposit)))
 
         EnergyDeposit = self.resconv6(EnergyDeposit)
