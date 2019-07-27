@@ -35,7 +35,7 @@ class ModelGConvTranspose(nn.Module):
         # self.dropout = nn.Dropout(p=0.2)
         self.finout = nn.Tanh()
         self.activation = nn.LeakyReLU(0.2)
-        self.bnrc = nn.BatchNorm2d(128)
+        self.bnrc = nn.BatchNorm2d(16)
         self.MomentumPointPDGScale = MomentumPointPDGScale
         # self.PointScale    = PointScale
         self.EnergyScale   = EnergyScale
