@@ -20,7 +20,7 @@ def normal_init(m, mean, std):
             m.bias.data.zero_()
 
 class ModelD(nn.Module):
-    def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_div=3):
+    def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3):
         super(ModelD, self).__init__()
         self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2)#30->14
         self.bn1 = nn.BatchNorm2d(16)
