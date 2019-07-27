@@ -54,7 +54,7 @@ class ModelD(nn.Module):
         # ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
         # ParticleMomentum_ParticlePoint = GetNormalizedMomentumPoint(ParticleMomentum_ParticlePoint,self.MomentumScale,self.PointScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
-        LabelImages = LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
+        LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
         EnergyDeposit = torch.cat([EnergyDeposit,LabelImages.cuda()],dim=1)
         EnergyDeposit = self.activation(self.conv1(EnergyDeposit))
         EnergyDeposut = self.dropout(EnergyDeposit)        
