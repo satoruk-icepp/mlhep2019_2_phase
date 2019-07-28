@@ -66,8 +66,8 @@ class ModelD(nn.Module):
         EnergyDeposut = self.dropout(EnergyDeposit)
         for ires in range(self.Nredconv_dis):
             EnergyDeposit = self.samesizerc(EnergyDeposit)
-        EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)                
         EnergyDeposit = self.conv5(EnergyDeposit) # 32, 9, 9        
+        EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)                
         return torch.sigmoid(EnergyDeposit)
 
     def weight_init(self, mean, std):
