@@ -6,4 +6,5 @@ def LabelToImages(row,col,MomentumPoint):
         for i in range(MomentumPoint.shape[1]):
             image[i,:,:]+=mp[i].cpu()
 #         print(image)
-    return torch.Tensor(images)
+    images = torch.Tensor(images).to(MomentumPoint.device)
+    return 
