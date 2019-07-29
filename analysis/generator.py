@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import Label2Image
+import analysis.Label2Image
 # from Label2Image import LabelToImages
-from NetworkUtil import ReducedConv,ResidualBlock
+from analysis.NetworkUtil import ReducedConv,ResidualBlock
 # import Normalization
 # NOISE_DIM = 10
 def normal_init(m, mean, std):
