@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import analysis.Label2Image
+import analysis.Label2Image as Label2Image
 # from Label2Image import LabelToImages
 from analysis.NetworkUtil import ReducedConv,ResidualBlock
 # import Normalization

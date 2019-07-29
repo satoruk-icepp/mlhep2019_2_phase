@@ -34,7 +34,7 @@ def main():
     # val
     ParticleMomentum_val = torch.tensor(data_val['ParticleMomentum']).float()
     ParticlePoint_val = torch.tensor(data_val['ParticlePoint'][:, :2]).float()
-    ParticlePDG_val = torch.tensor(data_val['ParticlePDG']).float()
+    ParticlePDG_val = torch.tensor(data_val['ParticlePDG'].reshape(-1,1)).float()
     ParticleMomentum_ParticlePoint_ParticlePDG_val = torch.cat([ParticleMomentum_val, ParticlePoint_val, ParticlePDG_val], dim=1)
     calo_dataset_val = utils.TensorDataset(ParticleMomentum_ParticlePoint_ParticlePDG_val)
     calo_dataloader_val = torch.utils.data.DataLoader(calo_dataset_val, batch_size=1024, shuffle=False)
@@ -55,7 +55,7 @@ def main():
     
     ParticleMomentum_test = torch.tensor(data_test['ParticleMomentum']).float()
     ParticlePoint_test = torch.tensor(data_test['ParticlePoint'][:, :2]).float()
-    ParticlePDG_test = torch.tensor(data_test['ParticlePDG']).float()
+    ParticlePDG_test = torch.tensor(data_test['ParticlePDG'].reshape(-1,1)).float()
     ParticleMomentum_ParticlePoint_ParticlePDG_test = torch.cat([ParticleMomentum_test, ParticlePoint_test, ParticlePDG_test], dim=1)
     calo_dataset_test = utils.TensorDataset(ParticleMomentum_ParticlePoint_ParticlePDG_test)
     calo_dataloader_test = torch.utils.data.DataLoader(calo_dataset_test, batch_size=1024, shuffle=False)
