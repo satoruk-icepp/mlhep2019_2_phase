@@ -29,7 +29,7 @@ def main():
     
     generator_cpu = ModelGConvTranspose(z_dim=NOISEIMAGE_DIM, MomentumPointPDGScale = MomentumPointPDGScale,EnergyScale = EnergyDepositScale)
     generator_cpu.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__)) + '/gan_middle.pt'))
-    generator_cpu.eval()
+    # generator_cpu.eval()
     
     # val
     ParticleMomentum_val = torch.tensor(data_val['ParticleMomentum']).float()
