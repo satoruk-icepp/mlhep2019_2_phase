@@ -27,7 +27,7 @@ def main():
     data_test = np.load(input_dir + '/data_test.npz', allow_pickle=True)
     test_data_path_out = output_dir + '/data_test_prediction.npz'
     
-    generator_cpu = ModelGConvTranspose(z_dim=NOISEIMAGE_DIM, MomentumPointPDGScale = MomentumPointPDGScale,EnergyScale = EnergyDepositScale)
+    generator_cpu = ModelGConvTranspose(z_dim=NOISEIMAGE_DIM, MomentumPointPDGScale = MomentumPointPDGScale,EnergyScale = EnergyDepositScale, Nredconv_gen=18)
     generator_cpu.load_state_dict(torch.load(os.path.dirname(os.path.abspath(__file__)) + '/gan50.pt'))
     # generator_cpu.eval()
     
