@@ -25,12 +25,14 @@ class ModelD(nn.Module):
         self.bn3 = nn.BatchNorm2d(self.conv3.out_channels)        
         self.conv4 = nn.Conv2d(64, 128, 3)##8->6
         self.bn4 = nn.BatchNorm2d(self.conv4.out_channels)                
-        self.conv5 = nn.Conv2d(128, 1, 6)##6->1
+        # self.conv5 = nn.Conv2d(128, 1, 6)##6->1
 
         self.activation = nn.LeakyReLU(negative_slope = 0.2)
         self.dropout = nn.Dropout(p=dropout_fraction)
         self.resblock = ResidualBlock(self.conv4.out_channels)
         self.samesizerc = ReducedConv(128,128,6,6,3)
+        
+        self.fc1 = nn.Linear(36,1)
         
         self.MomentumPointPDGScale = MomentumPointPDGScale
         self.EnergyScale = EnergyScale
@@ -53,9 +55,10 @@ class ModelD(nn.Module):
         for ires in range(self.Nredconv_dis):
             EnergyDeposit = self.resblock(EnergyDeposit)
             EnergyDeposut = self.dropout(EnergyDeposit)
-        EnergyDeposit = self.conv5(EnergyDeposit) # 32, 9, 9
+        
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
-        return torch.sigmoid(EnergyDeposit)
+        EnergyDeposit = self.fc1(EnergyDeposit) # 32, 9, 9
+        return EnergyDeposit, torch.sigmoid(EnergyDeposit)
 
     def weight_init(self, mean, std):
                 for m in self._modules:
