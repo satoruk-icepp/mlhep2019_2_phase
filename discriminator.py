@@ -32,7 +32,7 @@ class ModelD(nn.Module):
         self.resblock = ResidualBlock(self.conv4.out_channels)
         self.samesizerc = ReducedConv(128,128,6,6,3)
         
-        self.fc1 = nn.Linear(36,1)
+        self.fc1 = nn.Linear(4608,1)
         
         self.MomentumPointPDGScale = MomentumPointPDGScale
         self.EnergyScale = EnergyScale
