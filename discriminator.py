@@ -34,7 +34,7 @@ class ModelD(nn.Module):
         
         self.fc1 = nn.Linear(4608,2048)
         self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
-        self.fc2 = nn.Linear(int(self.fc1.out_features),self.fc1.out_features//2)
+        self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features//2)
         self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
         self.fc3 = nn.Linear(self.fc2.out_features,self.fc2.out_features//2)
         self.bn_fc3 = nn.BatchNorm1d(self.fc3.out_features)
@@ -54,17 +54,12 @@ class ModelD(nn.Module):
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
         LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
         EnergyDeposit = torch.cat([EnergyDeposit,LabelImages],dim=1)
-        EnergyDeposit = self.activation(self.conv1(EnergyDeposit))
-        EnergyDeposut = self.dropout(EnergyDeposit)        
-        EnergyDeposit = self.activation(self.bn2(self.conv2(EnergyDeposit)))
-        EnergyDeposut = self.dropout(EnergyDeposit)
-        EnergyDeposit = self.activation(self.bn3(self.conv3(EnergyDeposit)))
-        EnergyDeposut = self.dropout(EnergyDeposit)
-        EnergyDeposit = self.activation(self.bn4(self.conv4(EnergyDeposit))) # 32, 9, 9
-        EnergyDeposut = self.dropout(EnergyDeposit)
+        EnergyDeposit = self.dropout(self.activation(self.conv1(EnergyDeposit)))
+        EnergyDeposit = self.dropout(self.activation(self.bn2(self.conv2(EnergyDeposit))))
+        EnergyDeposit = self.dropout(self.activation(self.bn3(self.conv3(EnergyDeposit))))
+        EnergyDeposit = self.dropout(self.activation(self.bn4(self.conv4(EnergyDeposit)))) # 32, 9, 9
         for ires in range(self.Nredconv_dis):
-            EnergyDeposit = self.resblock(EnergyDeposit)
-            EnergyDeposut = self.dropout(EnergyDeposit)
+            EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
         EnergyDeposit = self.dropout(self.activation(self.bn_fc1(self.fc1(EnergyDeposit)))) # 32, 9, 9
