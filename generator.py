@@ -49,6 +49,7 @@ class ModelGConvTranspose(nn.Module):
         # z_image = z.view(-1,1,self.z_dim,self.z_dim)
         # EnergyDeposit = torch.cat([z_image,LabelImages],dim=1)
         z = z.view(z.shape[0],-1)
+        ParticleMomentum_ParticlePoint_ParticlePDG = ParticleMomentum_ParticlePoint_ParticlePDG.view(ParticleMomentum_ParticlePoint_ParticlePDG.shape[0],-1)
         EnergyDeposit = torch.cat([z,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
         # EnergyDeposit = x.view(-1, 256, 4, 4)
         EnergyDeposit = self.activation(self.bn1(self.resconv1(EnergyDeposit)))
