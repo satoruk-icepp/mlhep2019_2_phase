@@ -34,7 +34,7 @@ class ModelD(nn.Module):
         
         self.fc1 = nn.Linear(4608,2048)
         self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
-        self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features//2)
+        self.fc2 = nn.Linear(int(self.fc1.out_features),self.fc1.out_features//2)
         self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
         self.fc3 = nn.Linear(self.fc2.out_features,self.fc2.out_features//2)
         self.bn_fc3 = nn.BatchNorm1d(self.fc3.out_features)
