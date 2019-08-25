@@ -16,11 +16,12 @@ class ModelGConvTranspose(nn.Module):
     def __init__(self, z_dim, MomentumPointPDGScale, EnergyScale,Nredconv_gen = 5):
         self.z_dim = z_dim
         super(ModelGConvTranspose, self).__init__()
-        # self.fc1 = nn.Linear(self.z_dim + 2 + 3, 256*4*4)
+        self.fc1 = nn.Linear(self.z_dim*self.z_dim + 6, 256*4*4)
         # self.resblock = ResidualBlock(16)
         # self.resconv0 = ReducedConv(1+5,256,10,10,3)
         # self.resconv1 = ReducedConv(256,128,4,10,3)
-        self.resconv1 = ReducedConv(1+6,128,self.z_dim,10,3)
+        # self.resconv1 = ReducedConv(1+6,128,self.z_dim,10,3)
+        self.resconv1 = ReducedConv(256,128,4,10,3)
         self.bn1 = nn.BatchNorm2d(128)
         self.resconv2 = ReducedConv(128,64,10,14,3)
         self.bn2 = nn.BatchNorm2d(64)
@@ -44,9 +45,10 @@ class ModelGConvTranspose(nn.Module):
     def forward(self, z, ParticleMomentum_ParticlePoint_ParticlePDG):
         # ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
-        LabelImages = Label2Image.LabelToImages(self.z_dim,self.z_dim,ParticleMomentum_ParticlePoint_ParticlePDG)
-        z_image = z.view(-1,1,self.z_dim,self.z_dim)
-        EnergyDeposit = torch.cat([z_image,LabelImages],dim=1)
+        # LabelImages = Label2Image.LabelToImages(self.z_dim,self.z_dim,ParticleMomentum_ParticlePoint_ParticlePDG)
+        # z_image = z.view(-1,1,self.z_dim,self.z_dim)
+        # EnergyDeposit = torch.cat([z_image,LabelImages],dim=1)
+        EnergyDeposit = torch.cat([z,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
         # EnergyDeposit = x.view(-1, 256, 4, 4)
         EnergyDeposit = self.activation(self.bn1(self.resconv1(EnergyDeposit)))
         EnergyDeposit = self.activation(self.bn2(self.resconv2(EnergyDeposit)))
