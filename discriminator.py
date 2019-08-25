@@ -63,11 +63,11 @@ class ModelD(nn.Module):
             EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
-        EnergyDeposit = self.dropout(self.activation(self.bn_fc1(self.fc1(EnergyDeposit)))) # 32, 9, 9
-        EnergyDeposit = self.dropout(self.activation(self.bn_fc2(self.fc2(EnergyDeposit)))) # 32, 9, 9
-        EnergyDeposit = self.dropout(self.activation(self.bn_fc3(self.fc3(EnergyDeposit)))) # 32, 9, 9
-        EnergyDeposit = self.dropout(self.activation(self.bn_fc4(self.fc4(EnergyDeposit)))) # 32, 9, 9
-        EnergyDeposit = self.dropout(self.activation(self.bn_fc5(self.fc5(EnergyDeposit)))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.fc1(EnergyDeposit))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.fc2(EnergyDeposit))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.fc3(EnergyDeposit))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.fc4(EnergyDeposit))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.fc5(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.fc6(EnergyDeposit) # 32, 9, 9
         return EnergyDeposit, torch.sigmoid(EnergyDeposit)
 
