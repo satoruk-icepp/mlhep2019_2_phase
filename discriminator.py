@@ -33,10 +33,15 @@ class ModelD(nn.Module):
         self.samesizerc = ReducedConv(128,128,6,6,3)
         
         self.fc1 = nn.Linear(4608,2048)
+        self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
         self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features/2)
+        self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
         self.fc3 = nn.Linear(self.fc2.out_features,self.fc2.out_features/2)
+        self.bn_fc3 = nn.BatchNorm1d(self.fc3.out_features)
         self.fc4 = nn.Linear(self.fc3.out_features,self.fc3.out_features/2)
+        self.bn_fc4 = nn.BatchNorm1d(self.fc4.out_features)
         self.fc5 = nn.Linear(self.fc4.out_features,self.fc4.out_features/2)
+        self.bn_fc5 = nn.BatchNorm1d(self.fc5.out_features)
         self.fc6 = nn.Linear(self.fc5.out_features,1)
         
         self.MomentumPointPDGScale = MomentumPointPDGScale
@@ -62,7 +67,12 @@ class ModelD(nn.Module):
             EnergyDeposut = self.dropout(EnergyDeposit)
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
-        EnergyDeposit = self.fc1(EnergyDeposit) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.bn_fc1(self.fc1(EnergyDeposit)))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.bn_fc2(self.fc2(EnergyDeposit)))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.bn_fc3(self.fc3(EnergyDeposit)))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.bn_fc4(self.fc4(EnergyDeposit)))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.bn_fc5(self.fc5(EnergyDeposit)))) # 32, 9, 9
+        EnergyDeposit = self.fc6(EnergyDeposit) # 32, 9, 9
         return EnergyDeposit, torch.sigmoid(EnergyDeposit)
 
     def weight_init(self, mean, std):
