@@ -86,11 +86,13 @@ class ModelD_WGAN(nn.Module):
     def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5):
         super(ModelD_WGAN, self).__init__()
         self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2)#30->14
-        self.bn1 = nn.BatchNorm2d(16)
-        
         self.conv2 = nn.Conv2d(16, 32, 4)##14->11
         self.conv3 = nn.Conv2d(32, 64, 4)##11->8
         self.conv4 = nn.Conv2d(64, 128, 3)##8->6
+        self.ln1 = nn.LayerNorm([self.conv1.out_channels,14,14])
+        self.ln2 = nn.LayerNorm([self.conv2.out_channels,11,11])
+        self.ln3 = nn.LayerNorm([self.conv3.out_channels,8,8])
+        self.ln4 = nn.LayerNorm([self.conv4.out_channels,6,6])
         # self.conv5 = nn.Conv2d(128, 1, 6)##6->1
 
         self.activation = nn.LeakyReLU(negative_slope = 0.2)
@@ -121,10 +123,10 @@ class ModelD_WGAN(nn.Module):
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
         LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
         EnergyDeposit = torch.cat([EnergyDeposit,LabelImages],dim=1)
-        EnergyDeposit = self.dropout(self.activation(self.conv1(EnergyDeposit)))
-        EnergyDeposit = self.dropout(self.activation(self.conv2(EnergyDeposit)))
-        EnergyDeposit = self.dropout(self.activation(self.conv3(EnergyDeposit)))
-        EnergyDeposit = self.dropout(self.activation(self.conv4(EnergyDeposit))) # 32, 9, 9
+        EnergyDeposit = self.dropout(self.activation(self.ln1(self.conv1(EnergyDeposit))))
+        EnergyDeposit = self.dropout(self.activation(self.ln2(self.conv2(EnergyDeposit))))
+        EnergyDeposit = self.dropout(self.activation(self.ln3(self.conv3(EnergyDeposit))))
+        EnergyDeposit = self.dropout(self.activation(self.ln4(self.conv4(EnergyDeposit))))
         # for ires in range(self.Nredconv_dis):
         #     EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         
