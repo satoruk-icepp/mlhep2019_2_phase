@@ -85,13 +85,15 @@ class ModelD_WGAN(nn.Module):
     def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5, negative_slope=0.2):
         super(ModelD_WGAN, self).__init__()
         self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
-        self.conv2 = nn.Conv2d(16, 32, 5)##14->11
-        self.conv3 = nn.Conv2d(32, 64, 4)##11->8
-        self.conv4 = nn.Conv2d(64, 128, 4)##8->6
+        self.conv2 = nn.Conv2d(16, 32, 4)##16->13
+        self.conv3 = nn.Conv2d(32, 64, 4)##13->10
+        self.conv4 = nn.Conv2d(64, 128, 3)##10->8
+        self.conv5 = nn.Conv2d(128, 128, 3)##8->6
         self.ln1 = nn.LayerNorm([self.conv1.out_channels,16,16])
-        self.ln2 = nn.LayerNorm([self.conv2.out_channels,11,11])
-        self.ln3 = nn.LayerNorm([self.conv3.out_channels,8,8])
-        self.ln4 = nn.LayerNorm([self.conv4.out_channels,6,6])
+        self.ln2 = nn.LayerNorm([self.conv2.out_channels,13,13])
+        self.ln3 = nn.LayerNorm([self.conv3.out_channels,10,10])
+        self.ln4 = nn.LayerNorm([self.conv4.out_channels,8,8])
+        self.ln5 = nn.LayerNorm([self.conv4.out_channels,6,6])
         # self.conv5 = nn.Conv2d(128, 1, 6)##6->1
 
         self.activation = nn.LeakyReLU(negative_slope = negative_slope)
@@ -126,6 +128,7 @@ class ModelD_WGAN(nn.Module):
         EnergyDeposit = self.dropout(self.activation(self.ln2(self.conv2(EnergyDeposit))))
         EnergyDeposit = self.dropout(self.activation(self.ln3(self.conv3(EnergyDeposit))))
         EnergyDeposit = self.dropout(self.activation(self.ln4(self.conv4(EnergyDeposit))))
+        EnergyDeposit = self.dropout(self.activation(self.ln5(self.conv5(EnergyDeposit))))
         # for ires in range(self.Nredconv_dis):
         #     EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         
