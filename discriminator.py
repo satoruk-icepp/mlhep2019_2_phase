@@ -88,7 +88,7 @@ class ModelD_WGAN(nn.Module):
         self.conv2 = nn.Conv2d(16, 32, 5)##14->11
         self.conv3 = nn.Conv2d(32, 64, 4)##11->8
         self.conv4 = nn.Conv2d(64, 128, 4)##8->6
-        self.ln1 = nn.LayerNorm([self.conv1.out_channels,14,14])
+        self.ln1 = nn.LayerNorm([self.conv1.out_channels,16,16])
         self.ln2 = nn.LayerNorm([self.conv2.out_channels,11,11])
         self.ln3 = nn.LayerNorm([self.conv3.out_channels,8,8])
         self.ln4 = nn.LayerNorm([self.conv4.out_channels,6,6])
