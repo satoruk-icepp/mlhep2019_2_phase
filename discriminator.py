@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import Label2Image
-from NetworkUtil import ReducedConv,ResidualBlock
+from NetworkUtil import ReducedConv,ResidualBlock,ResidualBlock_LN
 import Normalization
 # NOISE_DIM = 10
 

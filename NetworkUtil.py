@@ -27,3 +27,16 @@ class ResidualBlock(nn.Module):
         x = self.activation(self.bn1(self.conv1(xraw)))
         x = self.activation(self.bn2(self.conv2(x))+xraw)
         return x
+        
+class ResidualBlock_LN(nn.Module):
+    def __init__(self,input_size):
+        super(ResidualBlock, self).__init__()        
+        self.conv1 = nn.Conv2d(input_size,input_size,3,padding=1)
+        self.conv2 = nn.Conv2d(input_size,input_size,3,padding=1)
+        # self.ln1 = nn.LayerNorm(self.conv1.out_channels)
+        # self.ln2 = nn.LayerNorm(self.conv2.out_channels)
+        self.activation = nn.LeakyReLU(0.2)
+    def forward(self,xraw):
+        x = self.activation(self.conv1(xraw))
+        x = self.activation(self.conv2(x)+xraw)
+        return x        
