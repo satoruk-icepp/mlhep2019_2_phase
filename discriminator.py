@@ -165,8 +165,6 @@ class ModelD_SMALL(nn.Module):
 
         self.activation = nn.LeakyReLU(negative_slope = negative_slope)
         self.dropout = nn.Dropout(p=dropout_fraction)
-        self.resblock = ResidualBlock_LN(self.conv4.out_channels)
-        self.samesizerc = ReducedConv(128,128,6,6,3)
         
         self.fc1 = nn.Linear(2304,512)
         self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features//2)
