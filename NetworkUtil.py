@@ -30,7 +30,7 @@ class ResidualBlock(nn.Module):
         
 class ResidualBlock_LN(nn.Module):
     def __init__(self,input_size):
-        super(ResidualBlock, self).__init__()        
+        super(ResidualBlock_LN, self).__init__()        
         self.conv1 = nn.Conv2d(input_size,input_size,3,padding=1)
         self.conv2 = nn.Conv2d(input_size,input_size,3,padding=1)
         # self.ln1 = nn.LayerNorm(self.conv1.out_channels)
