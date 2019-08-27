@@ -83,7 +83,7 @@ class ModelD(nn.Module):
                     m_to.bias.data = m_from.bias.data.clone()
                     
 class ModelD_WGAN(nn.Module):
-    def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5):
+    def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5, negative_slope=0.2):
         super(ModelD_WGAN, self).__init__()
         self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2)#30->14
         self.conv2 = nn.Conv2d(16, 32, 4)##14->11
@@ -95,7 +95,7 @@ class ModelD_WGAN(nn.Module):
         self.ln4 = nn.LayerNorm([self.conv4.out_channels,6,6])
         # self.conv5 = nn.Conv2d(128, 1, 6)##6->1
 
-        self.activation = nn.LeakyReLU(negative_slope = 0.2)
+        self.activation = nn.LeakyReLU(negative_slope = negative_slope)
         self.dropout = nn.Dropout(p=dropout_fraction)
         self.resblock = ResidualBlock(self.conv4.out_channels)
         self.samesizerc = ReducedConv(128,128,6,6,3)
