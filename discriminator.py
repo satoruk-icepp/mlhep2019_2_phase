@@ -18,7 +18,6 @@ class ModelD(nn.Module):
         super(ModelD, self).__init__()
         self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2)#30->14
         self.bn1 = nn.BatchNorm2d(16)
-        
         self.conv2 = nn.Conv2d(16, 32, 4)##14->11
         self.bn2 = nn.BatchNorm2d(self.conv2.out_channels)
         self.conv3 = nn.Conv2d(32, 64, 4)##11->8
@@ -86,9 +85,9 @@ class ModelD_WGAN(nn.Module):
     def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5, negative_slope=0.2):
         super(ModelD_WGAN, self).__init__()
         self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
-        self.conv2 = nn.Conv2d(16, 32, 4)##14->11
+        self.conv2 = nn.Conv2d(16, 32, 5)##14->11
         self.conv3 = nn.Conv2d(32, 64, 4)##11->8
-        self.conv4 = nn.Conv2d(64, 128, 3)##8->6
+        self.conv4 = nn.Conv2d(64, 128, 4)##8->6
         self.ln1 = nn.LayerNorm([self.conv1.out_channels,14,14])
         self.ln2 = nn.LayerNorm([self.conv2.out_channels,11,11])
         self.ln3 = nn.LayerNorm([self.conv3.out_channels,8,8])
