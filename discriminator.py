@@ -98,7 +98,7 @@ class ModelD_WGAN(nn.Module):
 
         self.activation = nn.LeakyReLU(negative_slope = negative_slope)
         self.dropout    = nn.Dropout(p=dropout_fraction)
-        self.resblock   = ResidualBlock_LN(self.conv1.out_channels)
+        self.resblock   = ResidualBlock_LN(self.conv3.out_channels)
         
         self.fc1 = nn.Linear(4608,2048)
         self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
