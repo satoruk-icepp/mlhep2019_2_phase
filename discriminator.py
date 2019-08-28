@@ -97,9 +97,8 @@ class ModelD_WGAN(nn.Module):
         # self.conv5 = nn.Conv2d(128, 1, 6)##6->1
 
         self.activation = nn.LeakyReLU(negative_slope = negative_slope)
-        self.dropout = nn.Dropout(p=dropout_fraction)
-        self.resblock = ResidualBlock_LN(self.conv4.out_channels)
-        self.samesizerc = ReducedConv(128,128,6,6,3)
+        self.dropout    = nn.Dropout(p=dropout_fraction)
+        self.resblock   = ResidualBlock_LN(self.conv1.out_channels)
         
         self.fc1 = nn.Linear(4608,2048)
         self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
@@ -127,10 +126,10 @@ class ModelD_WGAN(nn.Module):
         EnergyDeposit = self.dropout(self.activation(self.ln1(self.conv1(EnergyDeposit))))
         EnergyDeposit = self.dropout(self.activation(self.ln2(self.conv2(EnergyDeposit))))
         EnergyDeposit = self.dropout(self.activation(self.ln3(self.conv3(EnergyDeposit))))
+        for ires in range(self.Nredconv_dis):
+            EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         EnergyDeposit = self.dropout(self.activation(self.ln4(self.conv4(EnergyDeposit))))
         EnergyDeposit = self.dropout(self.activation(self.ln5(self.conv5(EnergyDeposit))))
-        # for ires in range(self.Nredconv_dis):
-        #     EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
         EnergyDeposit = self.dropout(self.activation(self.fc1(EnergyDeposit))) # 32, 9, 9
