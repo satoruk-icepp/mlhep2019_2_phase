@@ -60,6 +60,8 @@ class ModelGConvTranspose(nn.Module):
         # EnergyDeposit = self.activation(self.bn_fc2(self.fc2(EnergyDeposit)))
         EnergyDeposit = self.activation(self.fc1(EnergyDeposit))
         EnergyDeposit = self.activation(self.fc2(EnergyDeposit))
+        EnergyDeposit = self.activation(self.fc3(EnergyDeposit))
+        EnergyDeposit = self.activation(self.fc4(EnergyDeposit))
         EnergyDeposit = EnergyDeposit.view(-1, 256, 4, 4)
         EnergyDeposit = self.activation(self.bn1(self.resconv1(EnergyDeposit)))
         EnergyDeposit = self.activation(self.bn2(self.resconv2(EnergyDeposit)))
