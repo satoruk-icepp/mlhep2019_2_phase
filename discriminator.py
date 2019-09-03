@@ -52,7 +52,7 @@ class ModelD(nn.Module):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
         EnergyDeposit = EnergyDeposit/self.EnergyScale
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
-        LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
+        # LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
         # EnergyDeposit = torch.cat([EnergyDeposit,LabelImages],dim=1)
         EnergyDeposit = self.dropout(self.activation(self.conv1(EnergyDeposit)))
         EnergyDeposit = self.dropout(self.activation(self.bn2(self.conv2(EnergyDeposit))))
@@ -85,7 +85,7 @@ class ModelD(nn.Module):
 class ModelD_WGAN(nn.Module):
     def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5, negative_slope=0.2):
         super(ModelD_WGAN, self).__init__()
-        self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
+        self.conv1 = nn.Conv2d(1, 16, 4, stride=2, padding=2)#30->16
         self.conv2 = nn.Conv2d(16, 32, 4)##16->13
         self.conv3 = nn.Conv2d(32, 64, 4)##13->10
         self.conv4 = nn.Conv2d(64, 128, 3)##10->8
@@ -101,7 +101,7 @@ class ModelD_WGAN(nn.Module):
         self.dropout    = nn.Dropout(p=dropout_fraction)
         self.resblock   = ResidualBlock_LN(self.conv3.out_channels)
         
-        self.fc1 = nn.Linear(4608,2048)
+        self.fc1 = nn.Linear(4608+cond_dim,2048)
         self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
         self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features//2)
         self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
@@ -122,8 +122,8 @@ class ModelD_WGAN(nn.Module):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
         EnergyDeposit = EnergyDeposit/self.EnergyScale
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
-        LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
-        EnergyDeposit = torch.cat([EnergyDeposit,LabelImages],dim=1)
+        # LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
+        # EnergyDeposit = torch.cat([EnergyDeposit,LabelImages],dim=1)
         EnergyDeposit = self.dropout(self.activation(self.ln1(self.conv1(EnergyDeposit))))
         EnergyDeposit = self.dropout(self.activation(self.ln2(self.conv2(EnergyDeposit))))
         EnergyDeposit = self.dropout(self.activation(self.ln3(self.conv3(EnergyDeposit))))
@@ -133,6 +133,7 @@ class ModelD_WGAN(nn.Module):
         EnergyDeposit = self.dropout(self.activation(self.ln5(self.conv5(EnergyDeposit))))
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
+        EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
         EnergyDeposit = self.dropout(self.activation(self.fc1(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.dropout(self.activation(self.fc2(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.dropout(self.activation(self.fc3(EnergyDeposit))) # 32, 9, 9
