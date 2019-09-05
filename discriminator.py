@@ -156,7 +156,8 @@ class ModelD_WGAN(nn.Module):
 class ModelD_SMALL(nn.Module):
     def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5, negative_slope=0.2):
         super(ModelD_SMALL, self).__init__()
-        self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
+        # self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
+        self.conv1 = nn.Conv2d(1, 16, 4, stride=2, padding=2)#30->16
         self.conv2 = nn.Conv2d(16, 32, 4, stride=2, padding=1)##16->8
         self.conv3 = nn.Conv2d(32, 64, 3)##8->6
         self.ln1 = nn.LayerNorm([self.conv1.out_channels,16,16])
@@ -167,7 +168,7 @@ class ModelD_SMALL(nn.Module):
         self.activation = nn.LeakyReLU(negative_slope = negative_slope)
         self.dropout = nn.Dropout(p=dropout_fraction)
         
-        self.fc1 = nn.Linear(2304,512)
+        self.fc1 = nn.Linear(6*6*self.conv3.out_channels+cond_dim,512)
         self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features//2)
         self.fc3 = nn.Linear(self.fc2.out_features,1)
         
@@ -181,8 +182,8 @@ class ModelD_SMALL(nn.Module):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
         EnergyDeposit = EnergyDeposit/self.EnergyScale
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
-        LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
-        EnergyDeposit = torch.cat([EnergyDeposit,LabelImages],dim=1)
+        # LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
+        # EnergyDeposit = torch.cat([EnergyDeposit,LabelImages],dim=1)
         # EnergyDeposit = self.dropout(self.activation(self.ln1(self.conv1(EnergyDeposit))))
         # EnergyDeposit = self.dropout(self.activation(self.ln2(self.conv2(EnergyDeposit))))
         # EnergyDeposit = self.dropout(self.activation(self.ln3(self.conv3(EnergyDeposit))))
@@ -193,6 +194,7 @@ class ModelD_SMALL(nn.Module):
         #     EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
+        EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
         EnergyDeposit = self.dropout(self.activation(self.fc1(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.dropout(self.activation(self.fc2(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.fc3(EnergyDeposit) # 32, 9, 9
