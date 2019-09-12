@@ -195,7 +195,7 @@ class ModelD_SMALL(nn.Module):
         #     EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
-        EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
+        # EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
         EnergyDeposit = self.dropout(self.activation(self.fc1(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.dropout(self.activation(self.fc2(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.fc3(EnergyDeposit) # 32, 9, 9
