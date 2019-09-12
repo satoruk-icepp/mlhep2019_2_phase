@@ -156,8 +156,8 @@ class ModelD_WGAN(nn.Module):
 class ModelD_SMALL(nn.Module):
     def __init__(self, cond_dim, MomentumPointPDGScale, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5, negative_slope=0.2):
         super(ModelD_SMALL, self).__init__()
-        # self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
-        self.conv1 = nn.Conv2d(1, 16, 4, stride=2, padding=2)#30->16
+        self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
+        # self.conv1 = nn.Conv2d(1, 16, 4, stride=2, padding=2)#30->16
         self.conv2 = nn.Conv2d(16, 32, 4, stride=2, padding=1)##16->8
         self.conv3 = nn.Conv2d(32, 64, 3)##8->6
         self.ln1 = nn.LayerNorm([self.conv1.out_channels,16,16])
