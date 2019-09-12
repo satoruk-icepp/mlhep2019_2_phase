@@ -182,14 +182,15 @@ class ModelD_SMALL(nn.Module):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
         EnergyDeposit = EnergyDeposit/self.EnergyScale
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
+        ParticleMomentum_ParticlePoint_ParticlePDG = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
         # LabelImages = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
-        # EnergyDeposit = torch.cat([EnergyDeposit,LabelImages],dim=1)
-        # EnergyDeposit = self.dropout(self.activation(self.ln1(self.conv1(EnergyDeposit))))
-        # EnergyDeposit = self.dropout(self.activation(self.ln2(self.conv2(EnergyDeposit))))
-        # EnergyDeposit = self.dropout(self.activation(self.ln3(self.conv3(EnergyDeposit))))
-        EnergyDeposit = self.dropout(self.activation(self.conv1(EnergyDeposit)))
-        EnergyDeposit = self.dropout(self.activation(self.conv2(EnergyDeposit)))
-        EnergyDeposit = self.dropout(self.activation(self.conv3(EnergyDeposit)))
+        EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
+        EnergyDeposit = self.dropout(self.activation(self.ln1(self.conv1(EnergyDeposit))))
+        EnergyDeposit = self.dropout(self.activation(self.ln2(self.conv2(EnergyDeposit))))
+        EnergyDeposit = self.dropout(self.activation(self.ln3(self.conv3(EnergyDeposit))))
+        # EnergyDeposit = self.dropout(self.activation(self.conv1(EnergyDeposit)))
+        # EnergyDeposit = self.dropout(self.activation(self.conv2(EnergyDeposit)))
+        # EnergyDeposit = self.dropout(self.activation(self.conv3(EnergyDeposit)))
         # for ires in range(self.Nredconv_dis):
         #     EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))
         
