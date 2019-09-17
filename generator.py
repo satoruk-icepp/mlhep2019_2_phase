@@ -84,7 +84,7 @@ class ModelGConvTranspose(nn.Module):
                 normal_init(self._modules[m], mean, std)
                 
 class ModelGConvTranspose_SMALL(nn.Module):
-    def __init__(self, z_dim, MomentumPointPDGScale, EnergyScale,Nredconv_gen = 5):
+    def __init__(self, z_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,Nredconv_gen = 5):
         self.z_dim = z_dim
         super(ModelGConvTranspose_SMALL, self).__init__()
         self.fc1 = nn.Linear(self.z_dim*self.z_dim + 6, 256*4*4)
