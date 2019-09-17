@@ -14,7 +14,7 @@ def normal_init(m, mean, std):
             m.bias.data.zero_()
 
 class ModelD(nn.Module):
-    def __init__(self, cond_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale, Nredconv_dis=3, dropout_fraction=0.5, use_bn = True):
+    def __init__(self, cond_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset, Nredconv_dis=3, dropout_fraction=0.5, use_bn = True):
         super(ModelD, self).__init__()
         self.use_bn = use_bn
         self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
@@ -55,11 +55,12 @@ class ModelD(nn.Module):
         self.MomentumPointPDGScale = MomentumPointPDGScale
         self.MomentumPointPDGOffset = MomentumPointPDGOffset
         self.EnergyScale = EnergyScale
+        self.EnergyOffset   = EnergyOffset
         self.Nredconv_dis = Nredconv_dis
         
     def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint_ParticlePDG):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
-        EnergyDeposit = EnergyDeposit/self.EnergyScale
+        EnergyDeposit = torch.div(EnergyDeposit-self.EnergyOffset,self.EnergyScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG-self.MomentumPointPDGOffset,self.MomentumPointPDGScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
         EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)

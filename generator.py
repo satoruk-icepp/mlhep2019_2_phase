@@ -84,7 +84,7 @@ class ModelGConvTranspose(nn.Module):
                 normal_init(self._modules[m], mean, std)
                 
 class ModelGConvTranspose_SMALL(nn.Module):
-    def __init__(self, z_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,Nredconv_gen = 5):
+    def __init__(self, z_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset,Nredconv_gen = 5):
         self.z_dim = z_dim
         super(ModelGConvTranspose_SMALL, self).__init__()
         self.fc1 = nn.Linear(self.z_dim*self.z_dim + 6, 256*4*4)
@@ -100,6 +100,7 @@ class ModelGConvTranspose_SMALL(nn.Module):
         self.bnrc = nn.BatchNorm2d(16)
         self.MomentumPointPDGScale = MomentumPointPDGScale
         self.EnergyScale   = EnergyScale
+        self.EnergyOffset   = EnergyOffset
         self.Nredconv_gen  = Nredconv_gen
         
     def forward(self, z, ParticleMomentum_ParticlePoint_ParticlePDG):
@@ -120,7 +121,7 @@ class ModelGConvTranspose_SMALL(nn.Module):
         # EnergyDeposit = self.resconv6(EnergyDeposit)
         EnergyDeposit = torch.tanh(EnergyDeposit)
         assert EnergyDeposit.shape[2]==30, 'Generated Image has wrong size: %d'%(EnergyDeposit.shape[2])
-        EnergyDeposit = EnergyDeposit*self.EnergyScale
+        EnergyDeposit = EnergyDeposit*self.EnergyScale+self.EnergyOffset
 
         return EnergyDeposit
     
