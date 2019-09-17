@@ -36,7 +36,7 @@ class ModelD(nn.Module):
 
         self.activation = nn.LeakyReLU(negative_slope = 0.2)
         self.dropout = nn.Dropout(p=dropout_fraction)
-        self.resblock = ResidualBlock(self.conv4.out_channels)
+        self.resblock = ResidualBlock(self.conv4.out_channels,use_bn)
         self.samesizerc = ReducedConv(128,128,6,6,3)
         
         self.fc1 = nn.Linear(4608,2048)
