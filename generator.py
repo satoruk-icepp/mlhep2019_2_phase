@@ -43,13 +43,14 @@ class ModelGConvTranspose(nn.Module):
         self.activation = nn.LeakyReLU(0.2)
         self.bnrc = nn.BatchNorm2d(16)
         self.MomentumPointPDGScale = MomentumPointPDGScale
+        self.MomentumPointPDGOffset = MomentumPointPDGOffset
         # self.PointScale    = PointScale
         self.EnergyScale   = EnergyScale
         self.Nredconv_gen  = Nredconv_gen
         
     def forward(self, z, ParticleMomentum_ParticlePoint_ParticlePDG):
         # ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
-        ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG,self.MomentumPointPDGScale)
+        ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG-self.MomentumPointPDGOffset,self.MomentumPointPDGScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = Label2Image.LabelToImages(self.z_dim,self.z_dim,ParticleMomentum_ParticlePoint_ParticlePDG)
         z_image = z.view(-1,1,self.z_dim,self.z_dim)
         EnergyDeposit = torch.cat([z_image,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
