@@ -67,10 +67,10 @@ class ModelD(nn.Module):
         ## project image and extract mean and variance
         XProj = EnergyDeposit.sum(dim=2).view(EnergyDeposit.shape[0],-1)
         YProj = EnergyDeposit.sum(dim=3).view(EnergyDeposit.shape[0],-1)
-        XMean = torch.zeros(EnergyDeposit.shape[0]).cuda()
-        XVar  = torch.zeros(EnergyDeposit.shape[0]).cuda()
-        YMean = torch.zeros(EnergyDeposit.shape[0]).cuda()
-        YVar  = torch.zeros(EnergyDeposit.shape[0]).cuda()
+        XMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+        XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+        YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+        YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         for i in range(len(XProj)):
             XMean[i] =0
             XVar[i]  =0
