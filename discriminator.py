@@ -39,7 +39,7 @@ class ModelD(nn.Module):
         self.resblock = ResidualBlock(self.conv4.out_channels,use_bn)
         self.samesizerc = ReducedConv(128,128,6,6,3)
         
-        self.fc1 = nn.Linear(4608,2048)
+        self.fc1 = nn.Linear(4608+3,2048)
         self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
         self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features//2)
         self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
@@ -60,6 +60,15 @@ class ModelD(nn.Module):
         
     def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint_ParticlePDG):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
+        # EnergyDeposit_1d = EnergyDeposit.view(-1,900)
+        # MaxElement = torch.argmax(EnergyDeposit_1d,dim=1)
+        SumElement = torch.sum(EnergyDeposit,dim=1)/20000
+        XProj = EnergyDeposit.sum(dim=2)
+        YProj = EnergyDeposit.sum(dim=3)
+        XMax = (torch.argmax(XProj).float()-15)/30
+        YMax = (torch.argmax(YProj).float()-15)/30
+        AdditionalProperties = torch.tensor([SumElement,XMax,YMax])
+        
         EnergyDeposit = torch.div(EnergyDeposit-self.EnergyOffset,self.EnergyScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG-self.MomentumPointPDGOffset,self.MomentumPointPDGScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = Label2Image.LabelToImages(EnergyDeposit.shape[2],EnergyDeposit.shape[3],ParticleMomentum_ParticlePoint_ParticlePDG)
@@ -79,6 +88,7 @@ class ModelD(nn.Module):
                 EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))   
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
+        EnergyDeposit = torch.cat([EnergyDeposit,AdditionalProperties],dim=1)
         # EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
         EnergyDeposit = self.dropout(self.activation(self.fc1(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.dropout(self.activation(self.fc2(EnergyDeposit))) # 32, 9, 9
