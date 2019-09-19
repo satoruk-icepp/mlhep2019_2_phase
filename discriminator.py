@@ -72,19 +72,19 @@ class ModelD(nn.Module):
         XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
-        if SumElement[i]<100:
-            XMean[i] = 0
-            XVar[i]  = 1
-            YMean[i] = 0
-            YVar[i]  = 1
+        
         
         for i in range(EnergyDeposit.shape[0]):
-            XMean[i] = ((self.indices * XProj[i]).sum()/SumElement[i]-14.5)/15.0
-            XVar[i]  = XProj[i].norm()/SumElement[i]
-
-        for i in range(EnergyDeposit.shape[0]):
-            YMean[i] = ((self.indices * YProj[i]).sum()/SumElement[i]-14.5)/15.0
-            YVar[i]  = YProj[i].norm()/SumElement[i]
+            if SumElement[i]<100:
+                XMean[i] = 0
+                XVar[i]  = 1
+                YMean[i] = 0
+                YVar[i]  = 1
+            else:
+                XMean[i] = ((self.indices * XProj[i]).sum()/SumElement[i]-14.5)/15.0
+                XVar[i]  = XProj[i].norm()/SumElement[i]
+                YMean[i] = ((self.indices * YProj[i]).sum()/SumElement[i]-14.5)/15.0
+                YVar[i]  = YProj[i].norm()/SumElement[i]
         SumElement = SumElement/self.EnergyScale
         AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1)
         
