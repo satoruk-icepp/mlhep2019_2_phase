@@ -39,7 +39,7 @@ class ModelD(nn.Module):
         self.resblock = ResidualBlock(self.conv4.out_channels,use_bn)
         self.samesizerc = ReducedConv(128,128,6,6,3)
         
-        self.fc1 = nn.Linear(4608+3,2048)
+        self.fc1 = nn.Linear(4608+5,2048)
         self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
         self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features//2)
         self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
@@ -63,11 +63,30 @@ class ModelD(nn.Module):
         EnergyDeposit_1d = EnergyDeposit.view(-1,900)
         # MaxElement = torch.argmax(EnergyDeposit_1d,dim=1)
         SumElement = torch.sum(EnergyDeposit_1d,dim=1)/20000
+        ## project image and extract mean and variance
         XProj = EnergyDeposit.sum(dim=2).view(EnergyDeposit.shape[0],-1)
         YProj = EnergyDeposit.sum(dim=3).view(EnergyDeposit.shape[0],-1)
-        XMax = (torch.argmax(XProj,dim=1).float()-15)/30
-        YMax = (torch.argmax(YProj,dim=1).float()-15)/30
-        AdditionalProperties = torch.cat([SumElement,XMax,YMax],dim=0)
+        XMean = torch.zeros(len(XProj))
+        XVar  = torch.zeros(len(XProj))
+        for i in range(len(XProj)):
+            for j in range(len(XProj[i])):
+                XMean[i] += float(j)*XProj[i][j]/XProj[i].sum(dim=0)
+            for j in range(len(XProj[i])):
+                XVar[i] += ((j-XMean[i])*XProj[i][j])**2/XProj[i].sum(dim=0)
+            XMean[i] = (XMean[i]-14.5)/15.0
+            XVar[i] = torch.sqrt(XVar[i])
+        
+        YMean = torch.zeros(len(YProj))
+        YVar  = torch.zeros(len(YProj))
+        for i in range(len(YProj)):
+            for j in range(len(YProj[i])):
+                YMean[i] += float(j)*YProj[i][j]/YProj[i].sum(dim=0)
+            for j in range(len(XProj[i])):
+                YVar[i] += ((j-YMean[i])*YProj[i][j])**2/YProj[i].sum(dim=0)
+            YMean[i] = (YMean[i]-14.5)/15.0
+            YVar[i] = torch.sqrt(YVar[i])
+            
+        AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=0)
         
         EnergyDeposit = torch.div(EnergyDeposit-self.EnergyOffset,self.EnergyScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG-self.MomentumPointPDGOffset,self.MomentumPointPDGScale)
