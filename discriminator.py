@@ -91,7 +91,7 @@ class ModelD(nn.Module):
             YMean[i] = (YMean[i]-14.5)/15.0
             YVar[i] = torch.sqrt(YVar[i])
             
-        AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=0)
+        AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar])
         
         EnergyDeposit = torch.div(EnergyDeposit-self.EnergyOffset,self.EnergyScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG-self.MomentumPointPDGOffset,self.MomentumPointPDGScale)
