@@ -67,10 +67,10 @@ class ModelD(nn.Module):
         ## project image and extract mean and variance
         XProj = EnergyDeposit.sum(dim=2).view(EnergyDeposit.shape[0],-1)
         YProj = EnergyDeposit.sum(dim=3).view(EnergyDeposit.shape[0],-1)
-        XMean = torch.zeros(EnergyDeposit.shape[0],1)
-        XVar  = torch.zeros(EnergyDeposit.shape[0],1)
-        YMean = torch.zeros(EnergyDeposit.shape[0],1)
-        YVar  = torch.zeros(EnergyDeposit.shape[0],1)
+        XMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+        XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+        YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+        YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         for i in range(len(XProj)):
             XMean[i] =0
             XVar[i]  =0
@@ -91,7 +91,7 @@ class ModelD(nn.Module):
             YMean[i] = (YMean[i]-14.5)/15.0
             YVar[i] = torch.sqrt(YVar[i])
             
-        AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1).cuda()
+        AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1)
         
         EnergyDeposit = torch.div(EnergyDeposit-self.EnergyOffset,self.EnergyScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG-self.MomentumPointPDGOffset,self.MomentumPointPDGScale)
