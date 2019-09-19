@@ -74,6 +74,9 @@ class ModelD(nn.Module):
         for i in range(len(XProj)):
             XMean[i] =0
             XVar[i]  =0
+            if XProj[i].sum(dim=0)<1e-05:
+                print("zero projection")
+                break
             for j in range(len(XProj[i])):
                 XMean[i] += float(j)*XProj[i][j]/XProj[i].sum(dim=0)
             for j in range(len(XProj[i])):
@@ -84,6 +87,9 @@ class ModelD(nn.Module):
         for i in range(len(YProj)):
             YMean[i] =0
             YVar[i]  =0
+            if YProj[i].sum(dim=0)<1e-05:
+                print("zero projection")
+                break
             for j in range(len(YProj[i])):
                 YMean[i] += float(j)*YProj[i][j]/YProj[i].sum(dim=0)
             for j in range(len(XProj[i])):
