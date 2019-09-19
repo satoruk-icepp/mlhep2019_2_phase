@@ -71,7 +71,7 @@ class ModelD(nn.Module):
         XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
-        for i in range(5):
+        for i in range(EnergyDeposit.shape[0]):
             XMean[i] =0
             XVar[i]  =0
             if XProj[i].sum(dim=0)<1e-05:
@@ -84,7 +84,7 @@ class ModelD(nn.Module):
             XMean[i] = (XMean[i]-14.5)/15.0
             XVar[i] = torch.sqrt(XVar[i])
 
-        for i in range(5):
+        for i in range(EnergyDeposit.shape[0]):
             YMean[i] =0
             YVar[i]  =0
             for j in range(len(YProj[i])):
