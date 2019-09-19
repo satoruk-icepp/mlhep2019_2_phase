@@ -62,7 +62,7 @@ class ModelD(nn.Module):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
         EnergyDeposit_1d = EnergyDeposit.view(EnergyDeposit.shape[0],900)
         # MaxElement = torch.argmax(EnergyDeposit_1d,dim=1)
-        SumElement = torch.sum(EnergyDeposit_1d,dim=1)/20000
+        SumElement = torch.sum(EnergyDeposit_1d,dim=1)
         SumElement = SumElement.view(EnergyDeposit.shape[0],1)
         ## project image and extract mean and variance
         XProj = EnergyDeposit.sum(dim=2).view(EnergyDeposit.shape[0],-1)
@@ -71,32 +71,29 @@ class ModelD(nn.Module):
         XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
-        for i in range(len(XProj)):
+        for i in range(5):
             XMean[i] =0
             XVar[i]  =0
             if XProj[i].sum(dim=0)<1e-05:
                 print("zero projection")
                 break
             for j in range(len(XProj[i])):
-                XMean[i] += float(j)*XProj[i][j]/XProj[i].sum(dim=0)
+                XMean[i] += float(j)*XProj[i][j]/SumElement[i]
             for j in range(len(XProj[i])):
-                XVar[i] += ((j-XMean[i])*XProj[i][j])**2/XProj[i].sum(dim=0)
+                XVar[i] += ((j-XMean[i])*XProj[i][j])**2/SumElement[i]
             XMean[i] = (XMean[i]-14.5)/15.0
             XVar[i] = torch.sqrt(XVar[i])
-        
-        for i in range(len(YProj)):
+
+        for i in range(5):
             YMean[i] =0
             YVar[i]  =0
-            if YProj[i].sum(dim=0)<1e-05:
-                print("zero projection")
-                break
             for j in range(len(YProj[i])):
-                YMean[i] += float(j)*YProj[i][j]/YProj[i].sum(dim=0)
+                YMean[i] += float(j)*YProj[i][j]/SumElement[i]
             for j in range(len(XProj[i])):
-                YVar[i] += ((j-YMean[i])*YProj[i][j])**2/YProj[i].sum(dim=0)
+                YVar[i] += ((j-YMean[i])*YProj[i][j])**2/SumElement[i]
             YMean[i] = (YMean[i]-14.5)/15.0
-            YVar[i] = torch.sqrt(YVar[i])
-            
+            YVar[i]  = torch.sqrt(YVar[i])
+        SumElement = SumElement/20000
         AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1)
         
         EnergyDeposit = torch.div(EnergyDeposit-self.EnergyOffset,self.EnergyScale)
