@@ -60,9 +60,9 @@ class ModelD(nn.Module):
         
     def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint_ParticlePDG):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
-        # EnergyDeposit_1d = EnergyDeposit.view(-1,900)
+        EnergyDeposit_1d = EnergyDeposit.view(-1,900)
         # MaxElement = torch.argmax(EnergyDeposit_1d,dim=1)
-        SumElement = torch.sum(EnergyDeposit,dim=1)/20000
+        SumElement = torch.sum(EnergyDeposit_1d,dim=1)/20000
         XProj = EnergyDeposit.sum(dim=2)
         YProj = EnergyDeposit.sum(dim=3)
         XMax = (torch.argmax(XProj,dim=1).float()-15)/30
