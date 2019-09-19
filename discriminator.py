@@ -78,7 +78,7 @@ class ModelD(nn.Module):
             XVar[i]  = XProj[i].norm()/SumElement[i]
 
         for i in range(EnergyDeposit.shape[0]):
-            YMean[i] = ((indices * YProj[i]).sum()/SumElement[i]-14.5)/15.0
+            YMean[i] = ((self.indices * YProj[i]).sum()/SumElement[i]-14.5)/15.0
             YVar[i]  = YProj[i].norm()/SumElement[i]
         SumElement = SumElement/20000
         AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1)
