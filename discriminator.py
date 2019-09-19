@@ -65,8 +65,8 @@ class ModelD(nn.Module):
         SumElement = torch.sum(EnergyDeposit,dim=1)/20000
         XProj = EnergyDeposit.sum(dim=2)
         YProj = EnergyDeposit.sum(dim=3)
-        XMax = (torch.argmax(XProj).float()-15)/30
-        YMax = (torch.argmax(YProj).float()-15)/30
+        XMax = (torch.argmax(XProj,dim=1).float()-15)/30
+        YMax = (torch.argmax(YProj,dim=1).float()-15)/30
         AdditionalProperties = torch.cat([SumElement,XMax,YMax],dim=0)
         
         EnergyDeposit = torch.div(EnergyDeposit-self.EnergyOffset,self.EnergyScale)
