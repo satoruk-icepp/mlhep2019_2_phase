@@ -63,8 +63,8 @@ class ModelD(nn.Module):
         EnergyDeposit_1d = EnergyDeposit.view(-1,900)
         # MaxElement = torch.argmax(EnergyDeposit_1d,dim=1)
         SumElement = torch.sum(EnergyDeposit_1d,dim=1)/20000
-        XProj = EnergyDeposit.sum(dim=2)
-        YProj = EnergyDeposit.sum(dim=3)
+        XProj = EnergyDeposit.sum(dim=2).view(EnergyDeposit.shape[0],-1)
+        YProj = EnergyDeposit.sum(dim=3).view(EnergyDeposit.shape[0],-1)
         XMax = (torch.argmax(XProj,dim=1).float()-15)/30
         YMax = (torch.argmax(YProj,dim=1).float()-15)/30
         AdditionalProperties = torch.cat([SumElement,XMax,YMax],dim=0)
