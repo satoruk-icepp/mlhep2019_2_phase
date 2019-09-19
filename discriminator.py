@@ -57,6 +57,7 @@ class ModelD(nn.Module):
         self.EnergyScale = EnergyScale
         self.EnergyOffset   = EnergyOffset
         self.Nredconv_dis = Nredconv_dis
+        self.indices = torch.tensor([float(i) for i in range(30)]).cuda()
         
     def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint_ParticlePDG):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
@@ -71,18 +72,14 @@ class ModelD(nn.Module):
         XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
-        indices = torch.tensor([float(i) for i in range(EnergyDeposit.shape[2])]).cuda()
+        
         for i in range(EnergyDeposit.shape[0]):
-            XMean[i] = (indices * XProj[i]).sum()
-            XMean[i] = (XMean[i]/SumElement[i])
-            XVar[i]  = ((indices-XMean[i])*XProj[i]).norm()/SumElement[i]
-            XMean[i] = (XMean[i]-14.5)/15
+            XMean[i] = ((self.indices * XProj[i]).sum()/SumElement[i]-14.5)/15.0
+            XVar[i]  = XProj[i].norm()/SumElement[i]
 
         for i in range(EnergyDeposit.shape[0]):
-            YMean[i] = (indices * YProj[i]).sum()
-            YMean[i] = (YMean[i]/SumElement[i])
-            YVar[i]  = ((indices-YMean[i])*YProj[i]).norm()/SumElement[i]
-            YMean[i] = (YMean[i]-14.5)/15
+            YMean[i] = ((indices * YProj[i]).sum()/SumElement[i]-14.5)/15.0
+            YVar[i]  = YProj[i].norm()/SumElement[i]
         SumElement = SumElement/20000
         AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1)
         
