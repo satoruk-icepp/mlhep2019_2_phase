@@ -71,28 +71,18 @@ class ModelD(nn.Module):
         XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
         YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+        indices = torch.tensor([float(i) for i in range(EnergyDeposit.shape[2])]).cuda()
         for i in range(EnergyDeposit.shape[0]):
-            XMean[i] =0
-            XVar[i]  =0
-            if XProj[i].sum(dim=0)<1e-05:
-                print("zero projection")
-                break
-            for j in range(len(XProj[i])):
-                XMean[i] += float(j)*XProj[i][j]/SumElement[i]
-            for j in range(len(XProj[i])):
-                XVar[i] += ((j-XMean[i])*XProj[i][j])**2/SumElement[i]
-            XMean[i] = (XMean[i]-14.5)/15.0
-            XVar[i] = torch.sqrt(XVar[i])
+            XMean[i] = (indices * XProj[i]).sum()
+            XMean[i] = (XMean[i]/SumElement[i])
+            XVar[i]  = ((indices-XMean[i])*XProj[i]).norm()/SumElement[i]
+            XMean[i] = (XMean[i]-14.5)/15
 
         for i in range(EnergyDeposit.shape[0]):
-            YMean[i] =0
-            YVar[i]  =0
-            for j in range(len(YProj[i])):
-                YMean[i] += float(j)*YProj[i][j]/SumElement[i]
-            for j in range(len(XProj[i])):
-                YVar[i] += ((j-YMean[i])*YProj[i][j])**2/SumElement[i]
-            YMean[i] = (YMean[i]-14.5)/15.0
-            YVar[i]  = torch.sqrt(YVar[i])
+            YMean[i] = (indices * YProj[i]).sum()
+            YMean[i] = (YMean[i]/SumElement[i])
+            YVar[i]  = ((indices-YMean[i])*YProj[i]).norm()/SumElement[i]
+            YMean[i] = (YMean[i]-14.5)/15
         SumElement = SumElement/20000
         AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1)
         
