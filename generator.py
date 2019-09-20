@@ -30,10 +30,10 @@ class ModelGConvTranspose(nn.Module):
         else:
             self.resconv1 = ReducedConv(1+6,256,self.z_dim,10,3)
         # self.resconv1 = ReducedConv(256,128,4,10,3)
-        self.resconv2 = ReducedConv(128,64,10,14,3)
-        self.resconv3 = ReducedConv(64,32,14,18,3)
-        self.resconv4 = ReducedConv(32,16,18,30,3)
-        self.resconv5 = ReducedConv(16,1,30,30,3)
+        self.resconv2 = ReducedConv(self.resconv1.out_channels,self.resconv1.out_channels//2,10,14,3)
+        self.resconv3 = ReducedConv(self.resconv2.out_channels,self.resconv2.out_channels//2,14,18,3)
+        self.resconv4 = ReducedConv(self.resconv3.out_channels,self.resconv3.out_channels//2,18,30,3)
+        self.resconv5 = ReducedConv(self.resconv4.out_channels,1,30,30,3)
         # self.resconv6 = ReducedConv(8,1,26,30,3)
         self.bn1 = nn.BatchNorm2d(self.resconv1.out_channels)
         self.bn2 = nn.BatchNorm2d(self.resconv2.out_channels)
@@ -41,7 +41,7 @@ class ModelGConvTranspose(nn.Module):
         self.bn4 = nn.BatchNorm2d(self.resconv4.out_channels)
         # self.bn5 = nn.BatchNorm2d(self.resconv5.out_channels)
         
-        self.samesizerc = ReducedConv(16,16,30,30,3)
+        self.samesizerc = ReducedConv(self.resconv4.out_channels,self.resconv4.out_channels,30,30,3)
         self.bnrc       = nn.BatchNorm2d(self.samesizerc.out_channels)
         # self.dropout = nn.Dropout(p=0.2)
         self.finout = nn.Tanh()
