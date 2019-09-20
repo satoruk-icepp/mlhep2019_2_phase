@@ -10,6 +10,8 @@ class ReducedConv(nn.Module):
         self.ups = nn.Upsample(scale_factor = scale,mode = 'bilinear',align_corners=False )
         self.ref = nn.ReflectionPad2d(1)
         self.conv = nn.Conv2d(input_size,output_size,kernel_size)
+        self.in_channels = input_size
+        self.out_channels = output_size
     def forward(self,x):
         return self.conv(self.ref(self.ups(x)))
 #         return self.ref(self.ups(x))
