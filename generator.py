@@ -17,11 +17,11 @@ class ModelGConvTranspose(nn.Module):
         self.z_dim = z_dim
         super(ModelGConvTranspose, self).__init__()
         self.fc1 = nn.Linear(7*self.z_dim*self.z_dim, 128)
-        self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
-        self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
         self.fc2 = nn.Linear(self.fc1.out_features, self.fc1.out_features*2)
         self.fc3 = nn.Linear(self.fc2.out_features, self.fc2.out_features*2)
         self.fc4 = nn.Linear(self.fc3.out_features, 256*4*4)
+        self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
+        self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
         
         # self.resblock = ResidualBlock(16)
         # self.resconv0 = ReducedConv(1+5,256,10,10,3)
