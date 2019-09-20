@@ -74,8 +74,8 @@ class ModelGConvTranspose(nn.Module):
         EnergyDeposit = self.activation(self.bn3(self.resconv3(EnergyDeposit)))
         EnergyDeposit = self.activation(self.bn4(self.resconv4(EnergyDeposit)))
         for i in range(self.Nredconv_gen):
-            # EnergyDeposit = self.activation(self.bnrc(self.samesizerc(EnergyDeposit)))
-            EnergyDeposit = self.resblock(EnergyDeposit)
+            EnergyDeposit = self.activation(self.bnrc(self.samesizerc(EnergyDeposit)))
+            # EnergyDeposit = self.resblock(EnergyDeposit)
         # EnergyDeposit = self.activation(self.bn5(self.resconv5(EnergyDeposit)))
 
         EnergyDeposit = self.resconv5(EnergyDeposit)
