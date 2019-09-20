@@ -40,7 +40,7 @@ class ModelGConvTranspose(nn.Module):
         self.bn3 = nn.BatchNorm2d(self.resconv3.out_channels)
         self.bn4 = nn.BatchNorm2d(self.resconv4.out_channels)
         # self.bn5 = nn.BatchNorm2d(self.resconv5.out_channels)
-        
+        self.resblock   = ResidualBlock(self.resconv4.out_channels)
         self.samesizerc = ReducedConv(self.resconv4.out_channels,self.resconv4.out_channels,30,30,3)
         self.bnrc       = nn.BatchNorm2d(self.samesizerc.out_channels)
         # self.dropout = nn.Dropout(p=0.2)
@@ -74,7 +74,8 @@ class ModelGConvTranspose(nn.Module):
         EnergyDeposit = self.activation(self.bn3(self.resconv3(EnergyDeposit)))
         EnergyDeposit = self.activation(self.bn4(self.resconv4(EnergyDeposit)))
         for i in range(self.Nredconv_gen):
-            EnergyDeposit = self.activation(self.bnrc(self.samesizerc(EnergyDeposit)))
+            # EnergyDeposit = self.activation(self.bnrc(self.samesizerc(EnergyDeposit)))
+            EnergyDeposit = self.resblock(EnergyDeposit)
         # EnergyDeposit = self.activation(self.bn5(self.resconv5(EnergyDeposit)))
 
         EnergyDeposit = self.resconv5(EnergyDeposit)
