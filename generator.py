@@ -13,7 +13,7 @@ def normal_init(m, mean, std):
             m.bias.data.zero_()
 
 class ModelGConvTranspose(nn.Module):
-    def __init__(self, z_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset,Nredconv_gen = 5):
+    def __init__(self, z_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset,Nredconv_gen = 5,add_dense=False):
         self.z_dim = z_dim
         super(ModelGConvTranspose, self).__init__()
         self.fc1 = nn.Linear(7*self.z_dim*self.z_dim, 128)
