@@ -16,7 +16,7 @@ class ModelGConvTranspose(nn.Module):
     def __init__(self, z_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset,Nredconv_gen = 5,add_dense=False):
         self.z_dim = z_dim
         super(ModelGConvTranspose, self).__init__()
-        self.fc1 = nn.Linear(7*self.z_dim*self.z_dim, 128)
+        self.fc1 = nn.Linear(6+self.z_dim*self.z_dim, 256)
         self.fc2 = nn.Linear(self.fc1.out_features, self.fc1.out_features*2)
         self.fc3 = nn.Linear(self.fc2.out_features, self.fc2.out_features*2)
         self.fc4 = nn.Linear(self.fc3.out_features, 256*4*4)
@@ -58,16 +58,21 @@ class ModelGConvTranspose(nn.Module):
     def forward(self, z, ParticleMomentum_ParticlePoint_ParticlePDG):
         # ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG-self.MomentumPointPDGOffset,self.MomentumPointPDGScale)
-        ParticleMomentum_ParticlePoint_ParticlePDG = Label2Image.LabelToImages(self.z_dim,self.z_dim,ParticleMomentum_ParticlePoint_ParticlePDG)
+        # ParticleMomentum_ParticlePoint_ParticlePDG = Label2Image.LabelToImages(self.z_dim,self.z_dim,ParticleMomentum_ParticlePoint_ParticlePDG)
         EnergyDeposit = z.view(-1,1,self.z_dim,self.z_dim)
-        EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
+        
         if self.add_dense:
-            EnergyDeposit = EnergyDeposit.view(-1,7*self.z_dim*self.z_dim)
+            EnergyDeposit = EnergyDeposit.view(-1,self.z_dim*self.z_dim)
+            EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
             EnergyDeposit = self.activation(self.fc1(EnergyDeposit))
             EnergyDeposit = self.activation(self.fc2(EnergyDeposit))
             EnergyDeposit = self.activation(self.fc3(EnergyDeposit))
             EnergyDeposit = self.activation(self.fc4(EnergyDeposit))
             EnergyDeposit = EnergyDeposit.view(-1, 256, 4, 4)
+        else:
+            ParticleMomentum_ParticlePoint_ParticlePDG = Label2Image.LabelToImages(self.z_dim,self.z_dim,ParticleMomentum_ParticlePoint_ParticlePDG)
+            # EnergyDeposit = z.view(-1,1,self.z_dim,self.z_dim)
+            EnergyDeposit = torch.cat([EnergyDeposit,ParticleMomentum_ParticlePoint_ParticlePDG],dim=1)
             
         EnergyDeposit = self.activation(self.bn1(self.resconv1(EnergyDeposit)))
         EnergyDeposit = self.activation(self.bn2(self.resconv2(EnergyDeposit)))
