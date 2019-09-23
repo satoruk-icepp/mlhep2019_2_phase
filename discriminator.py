@@ -14,9 +14,10 @@ def normal_init(m, mean, std):
             m.bias.data.zero_()
 
 class ModelD(nn.Module):
-    def __init__(self, cond_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset, Nredconv_dis=3, dropout_fraction=0.5, use_bn = True):
+    def __init__(self, cond_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset, Nredconv_dis=3, dropout_fraction=0.5, use_bn = True, use_additionalinfo = False):
         super(ModelD, self).__init__()
         self.use_bn = use_bn
+        self.use_additionalinfo = use_additionalinfo
         self.conv1 = nn.Conv2d(1+cond_dim, 16, 4, stride=2, padding=2)#30->16
         self.bn1 = nn.BatchNorm2d(self.conv1.out_channels)
         self.ln1 = nn.LayerNorm([self.conv1.out_channels,16,16])
@@ -38,8 +39,10 @@ class ModelD(nn.Module):
         self.dropout = nn.Dropout(p=dropout_fraction)
         self.resblock = ResidualBlock(self.conv4.out_channels,use_bn)
         self.samesizerc = ReducedConv(128,128,6,6,3)
-        
-        self.fc1 = nn.Linear(4608+5,2048)
+        if self.use_additionalinfo:
+            self.fc1 = nn.Linear(4608+5,2048)
+        else:
+            self.fc1 = nn.Linear(4608,2048)
         self.fc2 = nn.Linear(self.fc1.out_features,self.fc1.out_features//2)
         self.fc3 = nn.Linear(self.fc2.out_features,self.fc2.out_features//2)
         self.fc4 = nn.Linear(self.fc3.out_features,self.fc3.out_features//2)
@@ -61,32 +64,33 @@ class ModelD(nn.Module):
         
     def forward(self, EnergyDeposit, ParticleMomentum_ParticlePoint_ParticlePDG):
         assert EnergyDeposit.shape[2]==30, 'Input Image has wrong size.'
-        EnergyDeposit_1d = EnergyDeposit.view(EnergyDeposit.shape[0],900)
-        # MaxElement = torch.argmax(EnergyDeposit_1d,dim=1)
-        SumElement = torch.sum(EnergyDeposit_1d,dim=1)
-        SumElement = SumElement.view(EnergyDeposit.shape[0],1)
-        ## project image and extract mean and variance
-        XProj = EnergyDeposit.sum(dim=2).view(EnergyDeposit.shape[0],-1)
-        YProj = EnergyDeposit.sum(dim=3).view(EnergyDeposit.shape[0],-1)
-        XMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
-        XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
-        YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
-        YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
-        
-        
-        for i in range(EnergyDeposit.shape[0]):
-            if SumElement[i]<100:
-                XMean[i] = 0
-                XVar[i]  = 1
-                YMean[i] = 0
-                YVar[i]  = 1
-            else:
-                XMean[i] = ((self.indices * XProj[i]).sum()/SumElement[i]-14.5)/15.0
-                XVar[i]  = XProj[i].norm()/SumElement[i]
-                YMean[i] = ((self.indices * YProj[i]).sum()/SumElement[i]-14.5)/15.0
-                YVar[i]  = YProj[i].norm()/SumElement[i]
-        SumElement = SumElement/self.EnergyScale
-        AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1)
+        if self.use_additionalinfo:
+            EnergyDeposit_1d = EnergyDeposit.view(EnergyDeposit.shape[0],900)
+            # MaxElement = torch.argmax(EnergyDeposit_1d,dim=1)
+            SumElement = torch.sum(EnergyDeposit_1d,dim=1)
+            SumElement = SumElement.view(EnergyDeposit.shape[0],1)
+            ## project image and extract mean and variance
+            XProj = EnergyDeposit.sum(dim=2).view(EnergyDeposit.shape[0],-1)
+            YProj = EnergyDeposit.sum(dim=3).view(EnergyDeposit.shape[0],-1)
+            XMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+            XVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+            YMean = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+            YVar  = torch.zeros(EnergyDeposit.shape[0],1).cuda()
+            
+            
+            for i in range(EnergyDeposit.shape[0]):
+                if SumElement[i]<100:
+                    XMean[i] = 0
+                    XVar[i]  = 1
+                    YMean[i] = 0
+                    YVar[i]  = 1
+                else:
+                    XMean[i] = ((self.indices * XProj[i]).sum()/SumElement[i]-14.5)/15.0
+                    XVar[i]  = XProj[i].norm()/SumElement[i]
+                    YMean[i] = ((self.indices * YProj[i]).sum()/SumElement[i]-14.5)/15.0
+                    YVar[i]  = YProj[i].norm()/SumElement[i]
+            SumElement = SumElement/self.EnergyScale
+            AdditionalProperties = torch.cat([SumElement,XMean,XVar,YMean,YVar],dim=1)
         
         EnergyDeposit = torch.div(EnergyDeposit-self.EnergyOffset,self.EnergyScale)
         ParticleMomentum_ParticlePoint_ParticlePDG = torch.div(ParticleMomentum_ParticlePoint_ParticlePDG-self.MomentumPointPDGOffset,self.MomentumPointPDGScale)
@@ -107,8 +111,9 @@ class ModelD(nn.Module):
                 EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))   
         
         EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
-        AdditionalProperties = AdditionalProperties.view(EnergyDeposit.shape[0], -1)
-        EnergyDeposit = torch.cat([EnergyDeposit,AdditionalProperties],dim=1)
+        if self.use_additionalinfo:
+            AdditionalProperties = AdditionalProperties.view(EnergyDeposit.shape[0], -1)
+            EnergyDeposit = torch.cat([EnergyDeposit,AdditionalProperties],dim=1)
         EnergyDeposit = self.dropout(self.activation(self.fc1(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.dropout(self.activation(self.fc2(EnergyDeposit))) # 32, 9, 9
         EnergyDeposit = self.dropout(self.activation(self.fc3(EnergyDeposit))) # 32, 9, 9
