@@ -131,6 +131,7 @@ class ModelD(nn.Module):
         MomentumPointPDG = self.dropout(self.activation(self.fc_add1(MomentumPointPDG))) # 32, 9, 9
         MomentumPointPDG = self.dropout(self.activation(self.fc_add2(MomentumPointPDG))) # 32, 9, 9
         MomentumPointPDG = self.fc_add3(MomentumPointPDG) # 32, 9, 9
+        MomentumPointPDG = MomentumPointPDG*self.MomentumPointPDGScale+self.MomentumPointPDGOffset
         return EnergyDeposit_1d, torch.sigmoid(EnergyDeposit_1d), MomentumPointPDG
 
     def weight_init(self, mean, std):
