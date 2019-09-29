@@ -128,7 +128,7 @@ class ModelD(nn.Module):
         EnergyDeposit_1d = self.fc6(EnergyDeposit_1d) # 32, 9, 9
         
         #indirect output
-        MomentumPointPDG = self.dropout(self.activation(self.fc_add1(EnergyDeposit_1d_raw))) # 32, 9, 9
+        MomentumPointPDG = self.dropout(self.activation(self.fc_add1(MomentumPointPDG))) # 32, 9, 9
         MomentumPointPDG = self.dropout(self.activation(self.fc_add2(MomentumPointPDG))) # 32, 9, 9
         MomentumPointPDG = self.fc_add3(MomentumPointPDG) # 32, 9, 9
         return EnergyDeposit_1d, torch.sigmoid(EnergyDeposit_1d), MomentumPointPDG
