@@ -48,6 +48,10 @@ class ModelD(nn.Module):
         self.fc4 = nn.Linear(self.fc3.out_features,self.fc3.out_features//2)
         self.fc5 = nn.Linear(self.fc4.out_features,self.fc4.out_features//2)
         self.fc6 = nn.Linear(self.fc5.out_features,1)
+        
+        self.fc_add1 = nn.Linear(self.fc1.in_features,self.fc1.in_features//2)
+        self.fc_add2 = nn.Linear(self.fc_add1.out_features,self.fc_add1.out_features//2)
+        self.fc_add3 = nn.Linear(self.fc_add2.out_features,6)
         self.bn_fc1 = nn.BatchNorm1d(self.fc1.out_features)
         self.bn_fc2 = nn.BatchNorm1d(self.fc2.out_features)
         self.bn_fc3 = nn.BatchNorm1d(self.fc3.out_features)
@@ -110,17 +114,24 @@ class ModelD(nn.Module):
             for ires in range(self.Nredconv_dis):
                 EnergyDeposit = self.dropout(self.resblock(EnergyDeposit))   
         
-        EnergyDeposit = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
+        EnergyDeposit_1d = EnergyDeposit.view(EnergyDeposit.shape[0], -1)
         if self.use_additionalinfo:
-            AdditionalProperties = AdditionalProperties.view(EnergyDeposit.shape[0], -1)
-            EnergyDeposit = torch.cat([EnergyDeposit,AdditionalProperties],dim=1)
-        EnergyDeposit = self.dropout(self.activation(self.fc1(EnergyDeposit))) # 32, 9, 9
-        EnergyDeposit = self.dropout(self.activation(self.fc2(EnergyDeposit))) # 32, 9, 9
-        EnergyDeposit = self.dropout(self.activation(self.fc3(EnergyDeposit))) # 32, 9, 9
-        EnergyDeposit = self.dropout(self.activation(self.fc4(EnergyDeposit))) # 32, 9, 9
-        EnergyDeposit = self.dropout(self.activation(self.fc5(EnergyDeposit))) # 32, 9, 9
-        EnergyDeposit = self.fc6(EnergyDeposit) # 32, 9, 9
-        return EnergyDeposit, torch.sigmoid(EnergyDeposit)
+            AdditionalProperties = AdditionalProperties.view(EnergyDeposit_1d.shape[0], -1)
+            EnergyDeposit_1d = torch.cat([EnergyDeposit_1d,AdditionalProperties],dim=1)
+        MomentumPointPDG = EnergyDeposit_1d
+        # direct output
+        EnergyDeposit_1d = self.dropout(self.activation(self.fc1(EnergyDeposit_1d))) # 32, 9, 9
+        EnergyDeposit_1d = self.dropout(self.activation(self.fc2(EnergyDeposit_1d))) # 32, 9, 9
+        EnergyDeposit_1d = self.dropout(self.activation(self.fc3(EnergyDeposit_1d))) # 32, 9, 9
+        EnergyDeposit_1d = self.dropout(self.activation(self.fc4(EnergyDeposit_1d))) # 32, 9, 9
+        EnergyDeposit_1d = self.dropout(self.activation(self.fc5(EnergyDeposit_1d))) # 32, 9, 9
+        EnergyDeposit_1d = self.fc6(EnergyDeposit_1d) # 32, 9, 9
+        
+        #indirect output
+        MomentumPointPDG = self.dropout(self.activation(self.fc_add1(EnergyDeposit_1d_raw))) # 32, 9, 9
+        MomentumPointPDG = self.dropout(self.activation(self.fc_add2(MomentumPointPDG))) # 32, 9, 9
+        MomentumPointPDG = self.fc_add3(MomentumPointPDG) # 32, 9, 9
+        return EnergyDeposit_1d, torch.sigmoid(EnergyDeposit_1d), MomentumPointPDG
 
     def weight_init(self, mean, std):
         for m in self._modules:
