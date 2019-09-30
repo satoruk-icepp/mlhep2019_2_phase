@@ -13,7 +13,7 @@ def normal_init(m, mean, std):
             m.bias.data.zero_()
 
 class ModelGConvTranspose(nn.Module):
-    def __init__(self, z_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset,Nredconv_gen = 5,add_dense=False):
+    def __init__(self, z_dim, MomentumPointPDGScale,MomentumPointPDGOffset, EnergyScale,EnergyOffset,Nredconv_gen = 5,add_dense=False,use_resblock=False):
         self.z_dim = z_dim
         super(ModelGConvTranspose, self).__init__()
         self.fc1 = nn.Linear(6+self.z_dim*self.z_dim, 256)
@@ -54,6 +54,7 @@ class ModelGConvTranspose(nn.Module):
         self.EnergyOffset   = EnergyOffset
         self.Nredconv_gen  = Nredconv_gen
         self.add_dense = add_dense
+        self.use_resblock = use_resblock
         
     def forward(self, z, ParticleMomentum_ParticlePoint_ParticlePDG):
         # ParticleMomentum_ParticlePoint = torch.div(ParticleMomentum_ParticlePoint,torch.cat([self.MomentumScale,self.PointScale]))
@@ -79,8 +80,11 @@ class ModelGConvTranspose(nn.Module):
         EnergyDeposit = self.activation(self.bn3(self.resconv3(EnergyDeposit)))
         EnergyDeposit = self.activation(self.bn4(self.resconv4(EnergyDeposit)))
         for i in range(self.Nredconv_gen):
-            EnergyDeposit = self.activation(self.bnrc(self.samesizerc(EnergyDeposit)))
-            # EnergyDeposit = self.resblock(EnergyDeposit)
+            if self.use_resblock:
+                EnergyDeposit = self.resblock(EnergyDeposit)
+            else:
+                EnergyDeposit = self.activation(self.bnrc(self.samesizerc(EnergyDeposit)))
+            
         # EnergyDeposit = self.activation(self.bn5(self.resconv5(EnergyDeposit)))
 
         EnergyDeposit = self.resconv5(EnergyDeposit)
